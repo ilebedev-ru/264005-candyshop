@@ -1,7 +1,7 @@
 # Личный проект «Кэндишоп» [![Build status][travis-image]][travis-url]
 
 * Студент: [Илья Лебедев](https://up.htmlacademy.ru/javascript/15/user/264005).
-* Наставник: `Неизвестно`.
+* Наставник: [Сергей Зверобоев](https://up.htmlacademy.ru/javascript/15/user/307159).
 
 ---
 
