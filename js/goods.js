@@ -1,6 +1,8 @@
 'use strict';
 
-var NAMES = [
+
+var GoodsData = {
+  NAMES: [
   'Чесночные сливки',
   'Огуречный педант',
   'Молочная хрюша',
@@ -29,9 +31,9 @@ var NAMES = [
   'Невинные винные',
   'Бельгийское пенное',
   'Острый язычок'
-];
+  ],
 
-var PICTURES = [
+  PICTURES: [
   'img/cards/ice-garlic.jpg',
   'img/cards/ice-cucumber.jpg',
   'img/cards/ice-pig.jpg',
@@ -60,67 +62,62 @@ var PICTURES = [
   'img/cards/marshmallow-wine.jpg',
   'img/cards/marshmallow-beer.jpg',
   'img/cards/marshmallow-spicy.jpg'
-];
+  ],
 
-var AMOUNTS = {
-  min: 0,
-  max: 20
+  AMOUNTS: {
+    min: 0,
+    max: 20
+  },
+
+  PRICES: {
+    min: 100,
+    max: 1500
+  },
+
+  WEIGHTS: {
+    min: 30,
+    max: 300
+  },
+
+  RATING_VALUES: {
+    min: 1,
+    max: 5
+  },
+
+  RATING_NUMBERS: {
+    min: 10,
+    max: 900
+  },
+
+  NUTRITION_FACTS_ENERGYS: {
+    min: 70,
+    max: 500
+  },
+
+  NUTRITION_FACTS_CONTENT: [
+    'молоко',
+    'сливки',
+    'вода',
+    'пищевой краситель',
+    'патока',
+    'ароматизатор бекона',
+    'ароматизатор свинца',
+    'ароматизатор дуба, идентичный натуральному',
+    'ароматизатор картофеля',
+    'лимонная кислота',
+    'загуститель',
+    'эмульгатор',
+    'консервант: сорбат калия',
+    'посолочная смесь: соль, нитрит натрия',
+    'ксилит',
+    'карбамид',
+    'вилларибо',
+    'виллабаджо',
+  ],
+
+  NUMBER_OF_GOODS: 26,
+  NUMBER_OF_GOODS_IN_CARD: 3
 };
-
-var PRICES = {
-  min: 100,
-  max: 1500
-};
-
-var WEIGHTS = {
-  min: 30,
-  max: 300
-};
-
-var RATING_VALUES = {
-  min: 1,
-  max: 5
-};
-
-var RATING_NUMBERS = {
-  min: 10,
-  max: 900
-};
-
-var NUTRITION_FACTS_ENERGYS = {
-  min: 70,
-  max: 500
-};
-
-var NUTRITION_FACTS_CONTENT = [
-  'молоко',
-  'сливки',
-  'вода',
-  'пищевой краситель',
-  'патока',
-  'ароматизатор бекона',
-  'ароматизатор свинца',
-  'ароматизатор дуба, идентичный натуральному',
-  'ароматизатор картофеля',
-  'лимонная кислота',
-  'загуститель',
-  'эмульгатор',
-  'консервант: сорбат калия',
-  'посолочная смесь: соль, нитрит натрия',
-  'ксилит',
-  'карбамид',
-  'вилларибо',
-  'виллабаджо',
-];
-
-var numberOfGoods = NAMES.length;
-var NUMBER_OF_GOODS_IN_CARD = 3;
-
-var ratings = [RATING_VALUES, RATING_NUMBERS];
-var nutritionFacts = [NUTRITION_FACTS_ENERGYS, NUTRITION_FACTS_CONTENT];
-
-var goods = [NAMES, PICTURES, AMOUNTS, PRICES, WEIGHTS, ratings, nutritionFacts];
-
 
 var getRamdomArrElement = function (arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -146,43 +143,47 @@ var getRandomString = function (arr) {
   return randomString;
 };
 
-var createGoodsItem = function (arr) {
-  var GoodsItem = {
-    name: getRamdomArrElement(arr[0]),
-    picture: getRamdomArrElement(arr[1]),
-    amount: getRandomNumber(arr[2].min, arr[2].max),
-    price: getRandomNumber(arr[3].min, arr[3].max),
-    weight: getRandomNumber(arr[4].min, arr[4].max),
+var shuffleArray = function (arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  }
+};
+
+var createGoodsItem = function (goodsData, i) {
+  var goodsItem = {
+    name: goodsData.NAMES[i],
+    picture: getRamdomArrElement(goodsData.PICTURES),
+    amount: getRandomNumber(goodsData.AMOUNTS.min, goodsData.AMOUNTS.max),
+    price: getRandomNumber(goodsData.PRICES.min, goodsData.PRICES.max),
+    weight: getRandomNumber(goodsData.WEIGHTS.min, goodsData.WEIGHTS.max),
     Rating: {
-      value: getRandomNumber(arr[5][0].min, arr[5][0].max),
-      number: getRandomNumber(arr[5][1].min, arr[5][1].max)
+      value: getRandomNumber(goodsData.RATING_VALUES.min, goodsData.RATING_VALUES.max),
+      number: getRandomNumber(goodsData.RATING_NUMBERS.min, goodsData.RATING_NUMBERS.max)
     },
     NutritionFact: {
       sugar: getRandomBoolean(),
-      energy: getRandomNumber(arr[6][0].min, arr[6][0].max),
-      contents: getRandomString(arr[6][1])
+      energy: getRandomNumber(goodsData.NUTRITION_FACTS_ENERGYS.min, goodsData.NUTRITION_FACTS_ENERGYS.max),
+      contents: getRandomString(goodsData.NUTRITION_FACTS_CONTENT)
     }
   };
-  return GoodsItem;
+  return goodsItem;
 };
 
-var createGoodsCollection = function (arr, num) {
+var createGoodsCollection = function (goodsData, num) {
   var collection = [];
+  shuffleArray(goodsData.NAMES);
+
   for (var i = 0; i < num; i++) {
-    collection[i] = createGoodsItem(arr);
+    collection[i] = createGoodsItem(goodsData, i);
   }
   return collection;
 };
 
-var goodsItems = createGoodsCollection(goods, numberOfGoods);
-
-var catalogCards = document.querySelector('.catalog__cards');
-catalogCards.classList.remove('catalog__cards--load');
-catalogCards.querySelector('.catalog__load').classList.add('visually-hidden');
-
-var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
-
 var renderGoodsElement = function (item) {
+  var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
   var goodsElement = catalogCardTemplate.cloneNode(true);
 
   goodsElement.querySelector('.card__title').textContent = item.name;
@@ -236,18 +237,20 @@ var createGoodsFragment = function (items) {
   return fragment;
 };
 
-catalogCards.appendChild(createGoodsFragment(goodsItems));
+var showGoods = function () {
+  var catalogCards = document.querySelector('.catalog__cards');
+  catalogCards.classList.remove('catalog__cards--load');
+  catalogCards.querySelector('.catalog__load').classList.add('visually-hidden');
+
+  var goodsItems = createGoodsCollection(GoodsData, GoodsData.NUMBER_OF_GOODS);
+  catalogCards.appendChild(createGoodsFragment(goodsItems));
+};
+
+showGoods();
 
 // CARD
-var goodsItemsInCard = createGoodsCollection(goods, NUMBER_OF_GOODS_IN_CARD);
-
-var goodsCards = document.querySelector('.goods__cards');
-goodsCards.classList.remove('goods__cards--empty');
-goodsCards.querySelector('.goods__card-empty').classList.add('visually-hidden');
-
-var goodsCardTemplate = document.querySelector('#card-order').content.querySelector('.goods_card');
-
 var renderGoodsInCardElement = function (item) {
+  var goodsCardTemplate = document.querySelector('#card-order').content.querySelector('.goods_card');
   var goodsInCardElement = goodsCardTemplate.cloneNode(true);
 
   goodsInCardElement.querySelector('.card-order__title').textContent = item.name;
@@ -266,4 +269,13 @@ var createGoodsInCardFragment = function (items) {
   return fragment;
 };
 
-goodsCards.appendChild(createGoodsInCardFragment(goodsItemsInCard));
+var showGoodsInCard = function () {
+  var goodsCards = document.querySelector('.goods__cards');
+  goodsCards.classList.remove('goods__cards--empty');
+  goodsCards.querySelector('.goods__card-empty').classList.add('visually-hidden');
+
+  var goodsItemsInCard = createGoodsCollection(GoodsData, GoodsData.NUMBER_OF_GOODS_IN_CARD);
+  goodsCards.appendChild(createGoodsInCardFragment(goodsItemsInCard));
+}
+
+showGoodsInCard();
