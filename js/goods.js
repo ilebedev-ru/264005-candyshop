@@ -115,12 +115,8 @@ var GoodsData = {
     'виллабаджо',
   ],
 
-  NUMBER_OF_GOODS: 26,
-  NUMBER_OF_GOODS_IN_CARD: 3
-};
-
-var getRamdomArrElement = function (arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
+  NUMBER: 26,
+  NUMBER_IN_CARD: 3
 };
 
 var getRandomNumber = function (min, max) {
@@ -130,17 +126,7 @@ var getRandomNumber = function (min, max) {
 };
 
 var getRandomBoolean = function () {
-  return !!Math.round(Math.random());
-};
-
-var getRandomString = function (arr) {
-  var randomString = '';
-  var stringQuantity = getRandomNumber(1, arr.length);
-  for (var i = 0; i < stringQuantity; i++) {
-    randomString += (arr[i] + ', ');
-  }
-  randomString.substring(0, randomString.length - 2);
-  return randomString;
+  return Math.random() >= 0.5;
 };
 
 var shuffleArray = function (arr) {
@@ -150,12 +136,26 @@ var shuffleArray = function (arr) {
     arr[i] = arr[j];
     arr[j] = temp;
   }
+  return arr;
+};
+
+var getRandomContent = function (arr) {
+  var randomContent = '';
+  var shuffleArr = shuffleArray(arr.slice(2, arr.length - 1));
+  shuffleArr.splice(0, 0, arr[0], arr[1]);
+
+  var stringQuantity = getRandomNumber(1, shuffleArr.length);
+  for (var i = 0; i < stringQuantity; i++) {
+    randomContent += (shuffleArr[i] + ', ');
+  }
+  randomContent.substring(0, randomContent.length - 2);
+  return randomContent;
 };
 
 var createGoodsItem = function (goodsData, i) {
   var goodsItem = {
     name: goodsData.NAMES[i],
-    picture: getRamdomArrElement(goodsData.PICTURES),
+    picture: goodsData.PICTURES[getRandomNumber(0, goodsData.PICTURES.length - 1)],
     amount: getRandomNumber(goodsData.AMOUNTS.min, goodsData.AMOUNTS.max),
     price: getRandomNumber(goodsData.PRICES.min, goodsData.PRICES.max),
     weight: getRandomNumber(goodsData.WEIGHTS.min, goodsData.WEIGHTS.max),
@@ -166,9 +166,10 @@ var createGoodsItem = function (goodsData, i) {
     NutritionFact: {
       sugar: getRandomBoolean(),
       energy: getRandomNumber(goodsData.NUTRITION_FACTS_ENERGYS.min, goodsData.NUTRITION_FACTS_ENERGYS.max),
-      contents: getRandomString(goodsData.NUTRITION_FACTS_CONTENT)
+      contents: getRandomContent(goodsData.NUTRITION_FACTS_CONTENT)
     }
   };
+
   return goodsItem;
 };
 
@@ -182,7 +183,7 @@ var createGoodsCollection = function (goodsData, num) {
   return collection;
 };
 
-var renderGoodsElement = function (item) {
+var createGoodsElement = function (item) {
   var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
   var goodsElement = catalogCardTemplate.cloneNode(true);
 
@@ -204,26 +205,18 @@ var renderGoodsElement = function (item) {
   }
 
   goodsElement.querySelector('.stars__rating').classList.remove('stars__rating--five');
-  if (item.Rating.value === 1) {
-    goodsElement.querySelector('.stars__rating').classList.add('stars__rating--one');
-  } else if (item.Rating.value === 2) {
-    goodsElement.querySelector('.stars__rating').classList.add('stars__rating--two');
-  } else if (item.Rating.value === 3) {
-    goodsElement.querySelector('.stars__rating').classList.add('stars__rating--three');
-  } else if (item.Rating.value === 4) {
-    goodsElement.querySelector('.stars__rating').classList.add('stars__rating--four');
-  } else if (item.Rating.value === 5) {
-    goodsElement.querySelector('.stars__rating').classList.add('stars__rating--five');
-  }
 
+  var ratingStars = {
+    1: 'stars__rating--one',
+    2: 'stars__rating--two',
+    3: 'stars__rating--three',
+    4: 'stars__rating--four',
+    5: 'stars__rating--five'
+  };
+
+  goodsElement.querySelector('.stars__rating').classList.add(ratingStars[item.Rating.value]);
   goodsElement.querySelector('.star__count').textContent = item.Rating.number;
-
-  if (item.NutritionFact.sugar) {
-    goodsElement.querySelector('.card__characteristic').textContent = 'Содержит сахар';
-  } else {
-    goodsElement.querySelector('.card__characteristic').textContent = 'Без сахара';
-  }
-
+  goodsElement.querySelector('.card__characteristic').textContent = item.NutritionFact.sugar ? 'Содержит сахар' : 'Без сахара';
   goodsElement.querySelector('.card__composition-list').textContent = item.NutritionFact.contents;
 
   return goodsElement;
@@ -232,24 +225,25 @@ var renderGoodsElement = function (item) {
 var createGoodsFragment = function (items) {
   var fragment = document.createDocumentFragment();
   for (var i = 0; i < items.length; i++) {
-    fragment.appendChild(renderGoodsElement(items[i]));
+    fragment.appendChild(createGoodsElement(items[i]));
   }
   return fragment;
 };
 
 var showGoods = function () {
   var catalogCards = document.querySelector('.catalog__cards');
+
+  var goodsItems = createGoodsCollection(GoodsData, GoodsData.NUMBER);
+  catalogCards.appendChild(createGoodsFragment(goodsItems));
+
   catalogCards.classList.remove('catalog__cards--load');
   catalogCards.querySelector('.catalog__load').classList.add('visually-hidden');
-
-  var goodsItems = createGoodsCollection(GoodsData, GoodsData.NUMBER_OF_GOODS);
-  catalogCards.appendChild(createGoodsFragment(goodsItems));
 };
 
 showGoods();
 
 // CARD
-var renderGoodsInCardElement = function (item) {
+var createGoodsInCardElement = function (item) {
   var goodsCardTemplate = document.querySelector('#card-order').content.querySelector('.goods_card');
   var goodsInCardElement = goodsCardTemplate.cloneNode(true);
 
@@ -264,18 +258,19 @@ var renderGoodsInCardElement = function (item) {
 var createGoodsInCardFragment = function (items) {
   var fragment = document.createDocumentFragment();
   for (var i = 0; i < items.length; i++) {
-    fragment.appendChild(renderGoodsInCardElement(items[i]));
+    fragment.appendChild(createGoodsInCardElement(items[i]));
   }
   return fragment;
 };
 
 var showGoodsInCard = function () {
   var goodsCards = document.querySelector('.goods__cards');
+
+  var goodsItemsInCard = createGoodsCollection(GoodsData, GoodsData.NUMBER_IN_CARD);
+  goodsCards.appendChild(createGoodsInCardFragment(goodsItemsInCard));
+
   goodsCards.classList.remove('goods__cards--empty');
   goodsCards.querySelector('.goods__card-empty').classList.add('visually-hidden');
-
-  var goodsItemsInCard = createGoodsCollection(GoodsData, GoodsData.NUMBER_OF_GOODS_IN_CARD);
-  goodsCards.appendChild(createGoodsInCardFragment(goodsItemsInCard));
 };
 
 showGoodsInCard();
