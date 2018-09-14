@@ -119,6 +119,15 @@ var GoodsData = {
   NUMBER_IN_CARD: 3
 };
 
+var ratingStars = {
+  1: 'stars__rating--one',
+  2: 'stars__rating--two',
+  3: 'stars__rating--three',
+  4: 'stars__rating--four',
+  5: 'stars__rating--five'
+};
+
+
 var getRandomNumber = function (min, max) {
   var rand = min - 0.5 + Math.random() * (max - min + 1);
   rand = Math.round(rand);
@@ -130,13 +139,14 @@ var getRandomBoolean = function () {
 };
 
 var shuffleArray = function (arr) {
-  for (var i = arr.length - 1; i > 0; i--) {
+  var shuffledArr = arr.slice(0);
+  for (var i = shuffledArr.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
-    var temp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = temp;
+    var temp = shuffledArr[i];
+    shuffledArr[i] = shuffledArr[j];
+    shuffledArr[j] = temp;
   }
-  return arr;
+  return shuffledArr;
 };
 
 var getRandomContent = function (arr) {
@@ -154,7 +164,7 @@ var getRandomContent = function (arr) {
 
 var createGoodsItem = function (goodsData, i) {
   var goodsItem = {
-    name: goodsData.NAMES[i],
+    name: shuffleArray(goodsData.NAMES)[i],
     picture: goodsData.PICTURES[getRandomNumber(0, goodsData.PICTURES.length - 1)],
     amount: getRandomNumber(goodsData.AMOUNTS.min, goodsData.AMOUNTS.max),
     price: getRandomNumber(goodsData.PRICES.min, goodsData.PRICES.max),
@@ -175,7 +185,6 @@ var createGoodsItem = function (goodsData, i) {
 
 var createGoodsCollection = function (goodsData, num) {
   var collection = [];
-  shuffleArray(goodsData.NAMES);
 
   for (var i = 0; i < num; i++) {
     collection[i] = createGoodsItem(goodsData, i);
@@ -183,8 +192,21 @@ var createGoodsCollection = function (goodsData, num) {
   return collection;
 };
 
+var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
+
+var putClassOnElementAmount = function (element, item) {
+  element.classList.remove('card--in-stock');
+
+  if (item > 5) {
+    element.classList.add('card--in-stock');
+  } else if (item <= 5 && item >= 1) {
+    element.classList.add('card--little');
+  } else if (item === 0) {
+    element.classList.add('card--soon');
+  }
+};
+
 var createGoodsElement = function (item) {
-  var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
   var goodsElement = catalogCardTemplate.cloneNode(true);
 
   goodsElement.querySelector('.card__title').textContent = item.name;
@@ -195,25 +217,9 @@ var createGoodsElement = function (item) {
     + item.weight
     + ' Г</span>';
 
-  goodsElement.classList.remove('card--in-stock');
-  if (item.amount > 5) {
-    goodsElement.classList.add('card--in-stock');
-  } else if (item.amount <= 5 && item.amount >= 1) {
-    goodsElement.classList.add('card--little');
-  } else if (item.amount === 0) {
-    goodsElement.classList.add('card--soon');
-  }
+  putClassOnElementAmount(goodsElement, item.amount);
 
   goodsElement.querySelector('.stars__rating').classList.remove('stars__rating--five');
-
-  var ratingStars = {
-    1: 'stars__rating--one',
-    2: 'stars__rating--two',
-    3: 'stars__rating--three',
-    4: 'stars__rating--four',
-    5: 'stars__rating--five'
-  };
-
   goodsElement.querySelector('.stars__rating').classList.add(ratingStars[item.Rating.value]);
   goodsElement.querySelector('.star__count').textContent = item.Rating.number;
   goodsElement.querySelector('.card__characteristic').textContent = item.NutritionFact.sugar ? 'Содержит сахар' : 'Без сахара';
@@ -243,8 +249,10 @@ var showGoods = function () {
 showGoods();
 
 // CARD
+
+var goodsCardTemplate = document.querySelector('#card-order').content.querySelector('.goods_card');
+
 var createGoodsInCardElement = function (item) {
-  var goodsCardTemplate = document.querySelector('#card-order').content.querySelector('.goods_card');
   var goodsInCardElement = goodsCardTemplate.cloneNode(true);
 
   goodsInCardElement.querySelector('.card-order__title').textContent = item.name;
