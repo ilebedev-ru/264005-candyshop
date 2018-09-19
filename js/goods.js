@@ -1,6 +1,5 @@
 'use strict';
 
-
 var GoodsData = {
   NAMES: [
     'Чесночные сливки',
@@ -115,8 +114,7 @@ var GoodsData = {
     'виллабаджо',
   ],
 
-  NUMBER: 26,
-  NUMBER_IN_CARD: 3
+  NUMBER: 26
 };
 
 var ratingStars = {
@@ -127,6 +125,7 @@ var ratingStars = {
   5: 'stars__rating--five'
 };
 
+var catalogCards = document.querySelector('.catalog__cards');
 
 var getRandomNumber = function (min, max) {
   var rand = min - 0.5 + Math.random() * (max - min + 1);
@@ -160,6 +159,15 @@ var getRandomContent = function (arr) {
   }
   randomContent.substring(0, randomContent.length - 2);
   return randomContent;
+};
+
+var disabledbuyForm = function (boolean) {
+  var buyForm = document.querySelector('.buy').querySelector('form');
+  var buyFormInputs = buyForm.querySelectorAll('input');
+
+  for (var i = 0; i < buyFormInputs.length; i++) {
+    buyFormInputs[i].disabled = boolean;
+  }
 };
 
 var createGoodsItem = function (goodsData, i) {
@@ -206,6 +214,24 @@ var putClassOnElementAmount = function (element, item) {
   }
 };
 
+var goodsElementHandler = function (evt, item, element) {
+  if (evt.target.classList.contains('card__btn')) {
+    evt.preventDefault();
+    if (item.amount > 0) {
+      copyGoodsToCard(item);
+    }
+  }
+
+  if (evt.target.classList.contains('card__btn-composition')) {
+    element.querySelector('.card__composition').classList.toggle('card__composition--hidden');
+  }
+
+  if (evt.target.classList.contains('card__btn-favorite')) {
+    evt.preventDefault();
+    evt.target.classList.toggle('card__btn-favorite--selected');
+  }
+};
+
 var createGoodsElement = function (item) {
   var goodsElement = catalogCardTemplate.cloneNode(true);
 
@@ -225,6 +251,10 @@ var createGoodsElement = function (item) {
   goodsElement.querySelector('.card__characteristic').textContent = item.NutritionFact.sugar ? 'Содержит сахар' : 'Без сахара';
   goodsElement.querySelector('.card__composition-list').textContent = item.NutritionFact.contents;
 
+  goodsElement.addEventListener('click', function (evt) {
+    goodsElementHandler(evt, item, goodsElement);
+  });
+
   return goodsElement;
 };
 
@@ -237,8 +267,6 @@ var createGoodsFragment = function (items) {
 };
 
 var showGoods = function () {
-  var catalogCards = document.querySelector('.catalog__cards');
-
   var goodsItems = createGoodsCollection(GoodsData, GoodsData.NUMBER);
   catalogCards.appendChild(createGoodsFragment(goodsItems));
 
@@ -249,8 +277,67 @@ var showGoods = function () {
 showGoods();
 
 // CARD
-
+var goodsInCardCollection = [];
 var goodsCardTemplate = document.querySelector('#card-order').content.querySelector('.goods_card');
+var goodsCards = document.querySelector('.goods__cards');
+var goodsCardsCopy = goodsCards.cloneNode(true);
+
+var copyGoodsToCard = function (item) {
+  var goodsElementCopy = Object.assign({}, item);
+
+  if (goodsInCardCollection.length > 0) {
+    for (var i = 0; i < goodsInCardCollection.length; i++) {
+      if (goodsInCardCollection[i].name === goodsElementCopy.name) {
+        goodsInCardCollection[i].orderedAmount++;
+        showGoodsInCard();
+        return;
+      }
+    }
+
+    goodsElementCopy.orderedAmount = 1;
+    goodsInCardCollection.push(goodsElementCopy);
+  } else {
+    goodsElementCopy.orderedAmount = 1;
+    goodsInCardCollection.push(goodsElementCopy);
+  }
+
+  showGoodsInCard();
+};
+
+var deleteGoodsInCard = function (name) {
+  var deleteIndex = '';
+  for (var i = 0; i < goodsInCardCollection.length; i++) {
+    if (goodsInCardCollection[i].name === name) {
+      deleteIndex = i;
+    }
+  }
+  goodsInCardCollection.splice(deleteIndex, 1);
+  showGoodsInCard();
+};
+
+var goodsInCardElementHandler = function (evt, item, element) {
+  if (evt.target.classList.contains('card-order__close')) {
+    evt.preventDefault();
+    deleteGoodsInCard(item.name);
+  }
+
+  if (evt.target.classList.contains('card-order__btn--decrease')) {
+    if (item.orderedAmount > 0) {
+      item.orderedAmount -= 1;
+      element.querySelector('.card-order__count').value = item.orderedAmount;
+      if (item.orderedAmount === 0) {
+        deleteGoodsInCard(item.name);
+      }
+    }
+  }
+
+  if (evt.target.classList.contains('card-order__btn--increase')) {
+    if (item.orderedAmount < item.amount) {
+      item.orderedAmount++;
+      element.querySelector('.card-order__count').value = item.orderedAmount;
+    }
+  }
+};
 
 var createGoodsInCardElement = function (item) {
   var goodsInCardElement = goodsCardTemplate.cloneNode(true);
@@ -259,6 +346,12 @@ var createGoodsInCardElement = function (item) {
   goodsInCardElement.querySelector('.card-order__img').src = item.picture;
   goodsInCardElement.querySelector('.card-order__img').alt = item.name;
   goodsInCardElement.querySelector('.card-order__price').textContent = item.price + ' ₽';
+
+  goodsInCardElement.addEventListener('click', function (evt) {
+    goodsInCardElementHandler(evt, item, goodsInCardElement);
+  });
+
+  goodsInCardElement.querySelector('.card-order__count').value = item.orderedAmount;
 
   return goodsInCardElement;
 };
@@ -272,13 +365,80 @@ var createGoodsInCardFragment = function (items) {
 };
 
 var showGoodsInCard = function () {
-  var goodsCards = document.querySelector('.goods__cards');
+  var GoodsInCardList = createGoodsInCardFragment(goodsInCardCollection);
+  goodsCards.innerHTML = goodsCardsCopy.innerHTML; // обнуление разметки
+  goodsCards.appendChild(GoodsInCardList);
 
-  var goodsItemsInCard = createGoodsCollection(GoodsData, GoodsData.NUMBER_IN_CARD);
-  goodsCards.appendChild(createGoodsInCardFragment(goodsItemsInCard));
-
-  goodsCards.classList.remove('goods__cards--empty');
-  goodsCards.querySelector('.goods__card-empty').classList.add('visually-hidden');
+  if (goodsInCardCollection.length > 0) {
+    disabledbuyForm(false);
+    document.querySelector('.main-header__basket').textContent = 'Товаров в корзине: ' + goodsInCardCollection.length;
+    goodsCards.classList.remove('goods__cards--empty');
+    goodsCards.querySelector('.goods__card-empty').classList.add('visually-hidden');
+  } else {
+    disabledbuyForm(true);
+    goodsCards.classList.add('goods__cards--empty');
+    goodsCards.querySelector('.goods__card-empty').classList.remove('visually-hidden');
+  }
 };
 
 showGoodsInCard();
+
+// переключение вкладок
+(function () {
+  var payment = document.querySelector('.payment');
+  var paymentCard = payment.querySelector('.payment__card-wrap');
+  var paymentCash = payment.querySelector('.payment__cash-wrap');
+
+
+  payment.addEventListener('click', function (evt) {
+    if (evt.target.id === 'payment__card') {
+      paymentCard.classList.remove('visually-hidden');
+      paymentCash.classList.add('visually-hidden');
+    }
+
+    if (evt.target.id === 'payment__cash') {
+      paymentCard.classList.add('visually-hidden');
+      paymentCash.classList.remove('visually-hidden');
+    }
+  });
+})();
+
+(function () {
+  var deliver = document.querySelector('.deliver');
+  var deliverStore = deliver.querySelector('.deliver__store');
+  var deliverCourier = deliver.querySelector('.deliver__courier');
+
+  deliver.addEventListener('click', function (evt) {
+    if (evt.target.id === 'deliver__store') {
+      deliverStore.classList.remove('visually-hidden');
+      deliverCourier.classList.add('visually-hidden');
+    }
+
+    if (evt.target.id === 'deliver__courier') {
+      deliverStore.classList.add('visually-hidden');
+      deliverCourier.classList.remove('visually-hidden');
+    }
+  });
+})();
+
+// первая фаза работы фильтра по цене
+(function () {
+  var rangeFilter = document.querySelector('.range__filter');
+  var rangeFilterWidth = getComputedStyle(rangeFilter).width.slice(0, -2);
+
+  var rangeBtnLeft = document.querySelector('.range__btn--left');
+  var rangeBtnRight = document.querySelector('.range__btn--right');
+  var rangePriceMin = document.querySelector('.range__price--min');
+  var rangePriceMax = document.querySelector('.range__price--max');
+
+  rangeBtnLeft.addEventListener('mouseup', function () {
+    var rangeBtnLeftX = getComputedStyle(rangeBtnLeft).left.slice(0, -2);
+    rangePriceMin.textContent = rangeBtnLeftX / rangeFilterWidth * 100;
+  });
+
+  rangeBtnRight.addEventListener('mouseup', function () {
+    var rangeBtnRightX = getComputedStyle(rangeBtnRight).right.slice(0, -2);
+    rangePriceMax.textContent = 100 - rangeBtnRightX / rangeFilterWidth * 100;
+  });
+})();
+
