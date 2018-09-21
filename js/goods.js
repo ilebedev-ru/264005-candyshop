@@ -139,9 +139,10 @@ var getCardDataItem = function (evt) {
     }
     target = target.parentElement;
   }
+  return target;
 };
 
-catalogCards.addEventListener('click', function(evt) {
+catalogCards.addEventListener('click', function (evt) {
   var dataItem = getCardDataItem(evt);
   var activeCard = goodsCollection[dataItem];
 
@@ -158,7 +159,7 @@ catalogCards.addEventListener('click', function(evt) {
   if (evt.target.classList.contains('card__btn-composition')) {
     var allCardsElement = catalogCards.querySelectorAll('[data-item]');
     for (var i = 0; i < allCardsElement.length; i++) {
-      if (allCardsElement[i].dataset.item == dataItem) {
+      if (allCardsElement[i].dataset.item === dataItem) {
         allCardsElement[i].querySelector('.card__composition').classList.toggle('card__composition--hidden');
       }
     }
@@ -194,7 +195,7 @@ var shuffleArray = function (arr) {
 
 var getRandomContent = function (arr) {
   var baseIngrigients = arr.slice(0, 2);
-  var randomQuality = getRandomNumber(2, arr.length-1);
+  var randomQuality = getRandomNumber(2, arr.length - 1);
   var shuffleArr = shuffleArray(arr.slice(randomQuality, arr.length));
   var randomContent = baseIngrigients.join(', ') + ', ' + shuffleArr.join(', ');
   return randomContent;
@@ -298,7 +299,7 @@ var goodsCards = document.querySelector('.goods__cards');
 var goodsCardsCopy = goodsCards.cloneNode(true);
 
 
-goodsCards.addEventListener('click', function(evt) {
+goodsCards.addEventListener('click', function (evt) {
   var dataItemInCard = getDataItemInCard(evt);
   var cardCollectionIndex = getArrIndex(goodsInCardCollection, dataItemInCard);
   var activeItemInCard = goodsInCardCollection[cardCollectionIndex];
@@ -342,6 +343,7 @@ var getDataItemInCard = function (evt) {
     }
     target = target.parentElement;
   }
+  return target;
 };
 
 
@@ -367,15 +369,15 @@ var copyGoodsToCard = function (item) {
   showGoodsInCard();
 };
 
-var getArrIndex = function(arr, property) {
+var getArrIndex = function (arr, property) {
   var arrIndex = '';
   for (var i = 0; i < arr.length; i++) {
-    if (arr[i].dataItem == property) {
+    if (+arr[i].dataItem === +property) {
       arrIndex = i;
     }
   }
   return arrIndex;
-}
+};
 
 var deleteGoodsInCard = function (index) {
   goodsInCardCollection.splice(index, 1);
@@ -437,9 +439,8 @@ showGoodsInCard();
   var paymentCard = payment.querySelector('.payment__card-wrap');
   var paymentCash = payment.querySelector('.payment__cash-wrap');
 
-
   payment.addEventListener('click', function (evt) {
-    if (evt.target.id === 'payment__card' ||  evt.target.id === 'payment__cash') {
+    if (evt.target.id === 'payment__card' || evt.target.id === 'payment__cash') {
       paymentCard.classList.toggle('visually-hidden');
       paymentCash.classList.toggle('visually-hidden');
     }
