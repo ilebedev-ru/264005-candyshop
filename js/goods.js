@@ -394,6 +394,7 @@ var getArrIndex = function (arr, property) {
 var deleteGoodsInCard = function (index, elementCollection) {
   goodsInCardCollection.splice(index, 1);
   elementCollection[index].remove();
+  showOrderedAmountSumm();
   if (goodsInCardCollection.length === 0) {
     disabledBuyForm(true);
     goodsCards.classList.add('goods__cards--empty');
