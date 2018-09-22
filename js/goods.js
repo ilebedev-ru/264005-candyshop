@@ -414,9 +414,8 @@ var createGoodsInCardElement = function (item) {
 };
 
 var showOrderedAmount = function (item) {
-  var cardCollectionIndex = getArrIndex(goodsInCardCollection, item.dataItem);
-  var allGoodsInCardElement = goodsCards.querySelectorAll('[data-item]');
-  allGoodsInCardElement[cardCollectionIndex].querySelector('.card-order__count').value = item.orderedAmount;
+  var activeCard = goodsCards.querySelector('[data-item="' + item.dataItem + '"]');
+  activeCard.querySelector('.card-order__count').value = item.orderedAmount;
 };
 
 var showOrderedAmountSumm = function () {
