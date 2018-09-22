@@ -296,6 +296,7 @@ showGoods();
 var goodsInCardCollection = [];
 var goodsCardTemplate = document.querySelector('#card-order').content.querySelector('.goods_card');
 var goodsCards = document.querySelector('.goods__cards');
+var basketCount = document.querySelector('.main-header__basket');
 disabledBuyForm(true);
 
 
@@ -397,6 +398,7 @@ var deleteGoodsInCard = function (index, elementCollection) {
     disabledBuyForm(true);
     goodsCards.classList.add('goods__cards--empty');
     goodsCards.querySelector('.goods__card-empty').classList.remove('visually-hidden');
+    basketCount.textContent = 'В корзине ничего нет';
   }
 };
 
@@ -423,7 +425,7 @@ var showOrderedAmountSumm = function () {
   for (var i = 0; i < goodsInCardCollection.length; i++) {
     orderedAmountSumm += goodsInCardCollection[i].orderedAmount;
   }
-  document.querySelector('.main-header__basket').textContent = 'Товаров в корзине: ' + orderedAmountSumm;
+  basketCount.textContent = 'Товаров в корзине: ' + orderedAmountSumm;
 };
 
 // переключение вкладок
