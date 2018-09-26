@@ -127,8 +127,22 @@ var ratingStars = {
 
 var catalogCards = document.querySelector('.catalog__cards');
 var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
+
 var buyForm = document.querySelector('.buy form');
 var buyFormInputs = buyForm.querySelectorAll('input');
+
+var payment = document.querySelector('.payment');
+var paymentCard = payment.querySelector('.payment__card-wrap');
+var paymentCash = payment.querySelector('.payment__cash-wrap');
+var paymentCardInputs = paymentCard.querySelectorAll('input');
+
+var deliver = document.querySelector('.deliver');
+var deliverStore = deliver.querySelector('.deliver__store');
+var deliverCourier = deliver.querySelector('.deliver__courier');
+var deliverСourierInputs = deliver.querySelectorAll('.deliver__address-entry-fields input');
+var deliverStoreInputs = deliver.querySelectorAll('.deliver__store-list input');
+var deliverStoreImg = deliver.querySelector('.deliver__store-map-img');
+
 
 var getCardDataItem = function (evt) {
   var target = evt.target;
@@ -359,6 +373,8 @@ var copyGoodsToCard = function (item, index) {
   var goodsCardCopy = Object.assign({}, item);
   goodsCardCopy.dataItem = index;
   disabledBuyForm(false);
+  togglePayment(true);
+  toggleDeliver(true);
 
   if (goodsInCardCollection.length === 0) {
     goodsCards.classList.remove('goods__cards--empty');
@@ -411,6 +427,7 @@ var createGoodsInCardElement = function (item) {
   goodsInCardElement.querySelector('.card-order__img').alt = item.name;
   goodsInCardElement.querySelector('.card-order__price').textContent = item.price + ' ₽';
   goodsInCardElement.querySelector('.card-order__count').value = item.orderedAmount;
+  goodsInCardElement.querySelector('.card-order__count').name = item.name;
   goodsInCardElement.dataset.item = item.dataItem;
 
   return goodsInCardElement;
@@ -429,32 +446,60 @@ var showOrderedAmountSumm = function () {
   basketCount.textContent = 'Товаров в корзине: ' + orderedAmountSumm;
 };
 
-// переключение вкладок
-(function () {
-  var payment = document.querySelector('.payment');
-  var paymentCard = payment.querySelector('.payment__card-wrap');
-  var paymentCash = payment.querySelector('.payment__cash-wrap');
+// переключение владки оплаты
+var togglePayment = function (boolean) {
+  if (boolean) {
+    paymentCard.classList.remove('visually-hidden');
+    paymentCash.classList.add('visually-hidden');
+  } else {
+    paymentCard.classList.add('visually-hidden');
+    paymentCash.classList.remove('visually-hidden');
+  }
 
-  payment.addEventListener('click', function (evt) {
-    if (evt.target.id === 'payment__card' || evt.target.id === 'payment__cash') {
-      paymentCard.classList.toggle('visually-hidden');
-      paymentCash.classList.toggle('visually-hidden');
-    }
-  });
-})();
+  for (var i = 0; i < paymentCardInputs.length; i++) {
+    paymentCardInputs[i].disabled = !boolean;
+  }
+};
 
-(function () {
-  var deliver = document.querySelector('.deliver');
-  var deliverStore = deliver.querySelector('.deliver__store');
-  var deliverCourier = deliver.querySelector('.deliver__courier');
+payment.addEventListener('click', function (evt) {
+  if (evt.target.id === 'payment__card') {
+    togglePayment(true);
+  } else if (evt.target.id === 'payment__cash') {
+    togglePayment(false);
+  }
+});
 
-  deliver.addEventListener('click', function (evt) {
-    if (evt.target.id === 'deliver__store' || evt.target.id === 'deliver__courier') {
-      deliverStore.classList.toggle('visually-hidden');
-      deliverCourier.classList.toggle('visually-hidden');
-    }
-  });
-})();
+// переключение владки доставки
+var toggleDeliver = function (boolean) {
+  if (boolean) {
+    deliverStore.classList.remove('visually-hidden');
+    deliverCourier.classList.add('visually-hidden');
+  } else {
+    deliverStore.classList.add('visually-hidden');
+    deliverCourier.classList.remove('visually-hidden');
+  }
+
+  for (var i = 0; i < deliverСourierInputs.length; i++) {
+    deliverСourierInputs[i].disabled = boolean;
+  }
+
+  for (var j = 0; j < deliverStoreInputs.length; j++) {
+    deliverStoreInputs[j].disabled = !boolean;
+  }
+};
+
+deliver.addEventListener('click', function (evt) {
+  if (evt.target.id === 'deliver__store') {
+    toggleDeliver(true);
+  } else if (evt.target.id === 'deliver__courier') {
+    toggleDeliver(false);
+  }
+
+  if (evt.target.classList.contains('input-btn__input')) {
+    deliverStoreImg.src = 'img/map/' + evt.target.value + '.jpg';
+    deliverStoreImg.alt = evt.target.value;
+  }
+});
 
 // первая фаза работы фильтра по цене
 (function () {
@@ -503,17 +548,19 @@ var showOrderedAmountSumm = function () {
     if (+bankCardInput.value > 0) {
       if (!checkNumberByLun(bankCardInput.value)) {
         bankCardInput.style.borderColor = 'red';
+        bankCardInput.setCustomValidity('Неверный номер карты');
         bankCardErrorMessadge.classList.remove('visually-hidden');
       } else {
         bankCardInput.style.borderColor = 'green';
-        bankCardSucsessMessadge.textContent = 'Подтверждена';
+        bankCardInput.setCustomValidity('');
+        bankCardSucsessMessadge.textContent = 'Одобрен';
         bankCardErrorMessadge.classList.add('visually-hidden');
       }
     } else {
       bankCardInput.style.borderColor = 'red';
+      bankCardInput.setCustomValidity('Неверный номер карты');
     }
   });
-
 })();
 
 
