@@ -117,6 +117,8 @@ var GoodsData = {
   NUMBER: 26
 };
 
+var CVC_MIN = 100;
+
 var ratingStars = {
   1: 'stars__rating--one',
   2: 'stars__rating--two',
@@ -565,7 +567,7 @@ deliver.addEventListener('click', function (evt) {
 
   cvcNumberInput.addEventListener('blur', function () {
     var cvcNumber = +cvcNumberInput.value;
-    if (cvcNumber < 100) {
+    if (cvcNumber < CVC_MIN) {
       cvcNumberInput.style.borderColor = 'red';
       cvcNumberInput.setCustomValidity('CVC код должен быть от 100 до 999');
     } else {
