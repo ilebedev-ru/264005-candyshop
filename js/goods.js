@@ -526,6 +526,9 @@ deliver.addEventListener('click', function (evt) {
 (function () {
   var bankCardSucsessMessadge = document.querySelector('.payment__card-status');
   var bankCardErrorMessadge = document.querySelector('.payment__error-message');
+  var cardNumberInput = document.querySelector('#payment__card-number');
+  var cvcNumberInput = document.querySelector('#payment__card-cvc');
+
   // алгоритм Луна
   var checkNumberByLun = function (number) {
     var numArr = number.split('').reverse();
@@ -542,23 +545,32 @@ deliver.addEventListener('click', function (evt) {
     return (results % 10 === 0) ? true : false;
   };
 
-  var bankCardInput = document.querySelector('#payment__card-number');
-
-  bankCardInput.addEventListener('blur', function () {
-    if (+bankCardInput.value > 0) {
-      if (!checkNumberByLun(bankCardInput.value)) {
-        bankCardInput.style.borderColor = 'red';
-        bankCardInput.setCustomValidity('Неверный номер карты');
+  cardNumberInput.addEventListener('blur', function () {
+    if (+cardNumberInput.value > 0) {
+      if (!checkNumberByLun(cardNumberInput.value)) {
+        cardNumberInput.style.borderColor = 'red';
+        cardNumberInput.setCustomValidity('Неверный номер карты');
         bankCardErrorMessadge.classList.remove('visually-hidden');
       } else {
-        bankCardInput.style.borderColor = 'green';
-        bankCardInput.setCustomValidity('');
+        cardNumberInput.style.borderColor = 'green';
+        cardNumberInput.setCustomValidity('');
         bankCardSucsessMessadge.textContent = 'Одобрен';
         bankCardErrorMessadge.classList.add('visually-hidden');
       }
     } else {
-      bankCardInput.style.borderColor = 'red';
-      bankCardInput.setCustomValidity('Неверный номер карты');
+      cardNumberInput.style.borderColor = 'red';
+      cardNumberInput.setCustomValidity('Неверный номер карты');
+    }
+  });
+
+  cvcNumberInput.addEventListener('blur', function () {
+    var cvcNumber = +cvcNumberInput.value;
+    if (cvcNumber < 100) {
+      cvcNumberInput.style.borderColor = 'red';
+      cvcNumberInput.setCustomValidity('CVC код должен быть от 100 до 999');
+    } else {
+      cvcNumberInput.style.borderColor = 'green';
+      cvcNumberInput.setCustomValidity('');
     }
   });
 })();
