@@ -375,8 +375,8 @@ var copyGoodsToCard = function (item, index) {
   var goodsCardCopy = Object.assign({}, item);
   goodsCardCopy.dataItem = index;
   disabledBuyForm(false);
-  togglePayment(true);
-  toggleDeliver(true);
+  togglePayment('payment__card');
+  toggleDeliver('deliver__store');
 
   if (goodsInCardCollection.length === 0) {
     goodsCards.classList.remove('goods__cards--empty');
@@ -449,53 +449,58 @@ var showOrderedAmountSumm = function () {
 };
 
 // переключение владки оплаты
-var togglePayment = function (boolean) {
-  if (boolean) {
+var togglePayment = function (type) {
+  if (type === 'payment__card') {
     paymentCard.classList.remove('visually-hidden');
     paymentCash.classList.add('visually-hidden');
-  } else {
-    paymentCard.classList.add('visually-hidden');
-    paymentCash.classList.remove('visually-hidden');
+    for (var i = 0; i < paymentCardInputs.length; i++) {
+      paymentCardInputs[i].disabled = false;
+    }
   }
 
-  for (var i = 0; i < paymentCardInputs.length; i++) {
-    paymentCardInputs[i].disabled = !boolean;
+  if (type === 'payment__cash') {
+    paymentCard.classList.add('visually-hidden');
+    paymentCash.classList.remove('visually-hidden');
+    for (var j = 0; j < paymentCardInputs.length; j++) {
+      paymentCardInputs[j].disabled = true;
+    }
+  }
+};
+
+
+// переключение владки доставки
+var toggleDeliver = function (type) {
+  if (type === 'deliver__store') {
+    deliverStore.classList.remove('visually-hidden');
+    deliverCourier.classList.add('visually-hidden');
+    for (var i = 0; i < deliverStoreInputs.length; i++) {
+      deliverStoreInputs[i].disabled = false;
+    }
+
+    for (var j = 0; j < deliverСourierInputs.length; j++) {
+      deliverСourierInputs[j].disabled = true;
+    }
+  }
+
+  if (type === 'deliver__courier') {
+    deliverStore.classList.add('visually-hidden');
+    deliverCourier.classList.remove('visually-hidden');
+    for (var k = 0; k < deliverStoreInputs.length; k++) {
+      deliverStoreInputs[k].disabled = true;
+    }
+
+    for (var l = 0; l < deliverСourierInputs.length; l++) {
+      deliverСourierInputs[l].disabled = false;
+    }
   }
 };
 
 payment.addEventListener('click', function (evt) {
-  if (evt.target.id === 'payment__card') {
-    togglePayment(true);
-  } else if (evt.target.id === 'payment__cash') {
-    togglePayment(false);
-  }
+  togglePayment(evt.target.id);
 });
 
-// переключение владки доставки
-var toggleDeliver = function (boolean) {
-  if (boolean) {
-    deliverStore.classList.remove('visually-hidden');
-    deliverCourier.classList.add('visually-hidden');
-  } else {
-    deliverStore.classList.add('visually-hidden');
-    deliverCourier.classList.remove('visually-hidden');
-  }
-
-  for (var i = 0; i < deliverСourierInputs.length; i++) {
-    deliverСourierInputs[i].disabled = boolean;
-  }
-
-  for (var j = 0; j < deliverStoreInputs.length; j++) {
-    deliverStoreInputs[j].disabled = !boolean;
-  }
-};
-
 deliver.addEventListener('click', function (evt) {
-  if (evt.target.id === 'deliver__store') {
-    toggleDeliver(true);
-  } else if (evt.target.id === 'deliver__courier') {
-    toggleDeliver(false);
-  }
+  toggleDeliver(evt.target.id);
 
   if (evt.target.classList.contains('input-btn__input')) {
     deliverStoreImg.src = 'img/map/' + evt.target.value + '.jpg';
@@ -526,10 +531,12 @@ deliver.addEventListener('click', function (evt) {
 
 // проверка банковской карты
 (function () {
-  var bankCardSucsessMessadge = document.querySelector('.payment__card-status');
-  var bankCardErrorMessadge = document.querySelector('.payment__error-message');
-  var cardNumberInput = document.querySelector('#payment__card-number');
-  var cvcNumberInput = document.querySelector('#payment__card-cvc');
+  var bankCardSucsessMessadge = payment.querySelector('.payment__card-status');
+  var bankCardErrorMessadge = payment.querySelector('.payment__error-message');
+  var emailInput = document.querySelector('#contact-data__email');
+  var cardNumberInput = payment.querySelector('#payment__card-number');
+  var cvcNumberInput = payment.querySelector('#payment__card-cvc');
+  var dateInput = payment.querySelector('#payment__card-date');
 
   // алгоритм Луна
   var checkNumberByLun = function (number) {
@@ -547,8 +554,19 @@ deliver.addEventListener('click', function (evt) {
     return (results % 10 === 0) ? true : false;
   };
 
+  emailInput.addEventListener('blur', function () {
+    if (emailInput.validity.patternMismatch) {
+      emailInput.setCustomValidity('Введите E-mail в формате mail@mail.ru');
+    } else {
+      emailInput.setCustomValidity('');
+    }
+  });
+
   cardNumberInput.addEventListener('blur', function () {
-    if (+cardNumberInput.value > 0) {
+    if (cardNumberInput.value.length !== 16) {
+      cardNumberInput.style.borderColor = 'red';
+      cardNumberInput.setCustomValidity('Номер карты должен содержать 16 цифр');
+    } else {
       if (!checkNumberByLun(cardNumberInput.value)) {
         cardNumberInput.style.borderColor = 'red';
         cardNumberInput.setCustomValidity('Неверный номер карты');
@@ -559,15 +577,25 @@ deliver.addEventListener('click', function (evt) {
         bankCardSucsessMessadge.textContent = 'Одобрен';
         bankCardErrorMessadge.classList.add('visually-hidden');
       }
-    } else {
-      cardNumberInput.style.borderColor = 'red';
-      cardNumberInput.setCustomValidity('Неверный номер карты');
+    }
+  });
+
+  dateInput.addEventListener('blur', function () {
+    if (dateInput.validity.patternMismatch) {
+      dateInput.setCustomValidity('Введите дату в формате ММ/ГГ');
+      dateInput.style.borderColor = 'red';
+    } else if (dateInput.value.length === 5) {
+      dateInput.setCustomValidity('');
+      dateInput.style.borderColor = 'green';
     }
   });
 
   cvcNumberInput.addEventListener('blur', function () {
     var cvcNumber = +cvcNumberInput.value;
-    if (cvcNumber < CVC_MIN) {
+    if (cvcNumberInput.validity.patternMismatch) {
+      cvcNumberInput.setCustomValidity('CVC код должен состоять из цифр');
+      cvcNumberInput.style.borderColor = 'red';
+    } else if (cvcNumber < CVC_MIN) {
       cvcNumberInput.style.borderColor = 'red';
       cvcNumberInput.setCustomValidity('CVC код должен быть от 100 до 999');
     } else {
