@@ -117,6 +117,8 @@ var GoodsData = {
   NUMBER: 26
 };
 
+var CVC_MIN = 100;
+
 var ratingStars = {
   1: 'stars__rating--one',
   2: 'stars__rating--two',
@@ -127,8 +129,22 @@ var ratingStars = {
 
 var catalogCards = document.querySelector('.catalog__cards');
 var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
+
 var buyForm = document.querySelector('.buy form');
 var buyFormInputs = buyForm.querySelectorAll('input');
+
+var payment = document.querySelector('.payment');
+var paymentCard = payment.querySelector('.payment__card-wrap');
+var paymentCash = payment.querySelector('.payment__cash-wrap');
+var paymentCardInputs = paymentCard.querySelectorAll('input');
+
+var deliver = document.querySelector('.deliver');
+var deliverStore = deliver.querySelector('.deliver__store');
+var deliverCourier = deliver.querySelector('.deliver__courier');
+var deliverСourierInputs = deliver.querySelectorAll('.deliver__address-entry-fields input');
+var deliverStoreInputs = deliver.querySelectorAll('.deliver__store-list input');
+var deliverStoreImg = deliver.querySelector('.deliver__store-map-img');
+
 
 var getCardDataItem = function (evt) {
   var target = evt.target;
@@ -359,6 +375,8 @@ var copyGoodsToCard = function (item, index) {
   var goodsCardCopy = Object.assign({}, item);
   goodsCardCopy.dataItem = index;
   disabledBuyForm(false);
+  togglePayment('payment__card');
+  toggleDeliver('deliver__store');
 
   if (goodsInCardCollection.length === 0) {
     goodsCards.classList.remove('goods__cards--empty');
@@ -411,6 +429,7 @@ var createGoodsInCardElement = function (item) {
   goodsInCardElement.querySelector('.card-order__img').alt = item.name;
   goodsInCardElement.querySelector('.card-order__price').textContent = item.price + ' ₽';
   goodsInCardElement.querySelector('.card-order__count').value = item.orderedAmount;
+  goodsInCardElement.querySelector('.card-order__count').name = item.name;
   goodsInCardElement.dataset.item = item.dataItem;
 
   return goodsInCardElement;
@@ -429,32 +448,65 @@ var showOrderedAmountSumm = function () {
   basketCount.textContent = 'Товаров в корзине: ' + orderedAmountSumm;
 };
 
-// переключение вкладок
-(function () {
-  var payment = document.querySelector('.payment');
-  var paymentCard = payment.querySelector('.payment__card-wrap');
-  var paymentCash = payment.querySelector('.payment__cash-wrap');
-
-  payment.addEventListener('click', function (evt) {
-    if (evt.target.id === 'payment__card' || evt.target.id === 'payment__cash') {
-      paymentCard.classList.toggle('visually-hidden');
-      paymentCash.classList.toggle('visually-hidden');
+// переключение владки оплаты
+var togglePayment = function (type) {
+  if (type === 'payment__card') {
+    paymentCard.classList.remove('visually-hidden');
+    paymentCash.classList.add('visually-hidden');
+    for (var i = 0; i < paymentCardInputs.length; i++) {
+      paymentCardInputs[i].disabled = false;
     }
-  });
-})();
+  }
 
-(function () {
-  var deliver = document.querySelector('.deliver');
-  var deliverStore = deliver.querySelector('.deliver__store');
-  var deliverCourier = deliver.querySelector('.deliver__courier');
-
-  deliver.addEventListener('click', function (evt) {
-    if (evt.target.id === 'deliver__store' || evt.target.id === 'deliver__courier') {
-      deliverStore.classList.toggle('visually-hidden');
-      deliverCourier.classList.toggle('visually-hidden');
+  if (type === 'payment__cash') {
+    paymentCard.classList.add('visually-hidden');
+    paymentCash.classList.remove('visually-hidden');
+    for (var j = 0; j < paymentCardInputs.length; j++) {
+      paymentCardInputs[j].disabled = true;
     }
-  });
-})();
+  }
+};
+
+
+// переключение владки доставки
+var toggleDeliver = function (type) {
+  if (type === 'deliver__store') {
+    deliverStore.classList.remove('visually-hidden');
+    deliverCourier.classList.add('visually-hidden');
+    for (var i = 0; i < deliverStoreInputs.length; i++) {
+      deliverStoreInputs[i].disabled = false;
+    }
+
+    for (var j = 0; j < deliverСourierInputs.length; j++) {
+      deliverСourierInputs[j].disabled = true;
+    }
+  }
+
+  if (type === 'deliver__courier') {
+    deliverStore.classList.add('visually-hidden');
+    deliverCourier.classList.remove('visually-hidden');
+    for (var k = 0; k < deliverStoreInputs.length; k++) {
+      deliverStoreInputs[k].disabled = true;
+    }
+
+    for (var l = 0; l < deliverСourierInputs.length; l++) {
+      deliverСourierInputs[l].disabled = false;
+    }
+  }
+};
+
+payment.addEventListener('click', function (evt) {
+  togglePayment(evt.target.id);
+});
+
+deliver.addEventListener('click', function (evt) {
+  toggleDeliver(evt.target.id);
+
+  if (evt.target.classList.contains('input-btn__input')) {
+    deliverStoreImg.src = 'img/map/' + evt.target.value + '.jpg';
+    deliverStoreImg.alt = evt.target.value;
+  }
+});
 
 // первая фаза работы фильтра по цене
 (function () {
@@ -479,8 +531,13 @@ var showOrderedAmountSumm = function () {
 
 // проверка банковской карты
 (function () {
-  var bankCardSucsessMessadge = document.querySelector('.payment__card-status');
-  var bankCardErrorMessadge = document.querySelector('.payment__error-message');
+  var bankCardSucsessMessadge = payment.querySelector('.payment__card-status');
+  var bankCardErrorMessadge = payment.querySelector('.payment__error-message');
+  var emailInput = document.querySelector('#contact-data__email');
+  var cardNumberInput = payment.querySelector('#payment__card-number');
+  var cvcNumberInput = payment.querySelector('#payment__card-cvc');
+  var dateInput = payment.querySelector('#payment__card-date');
+
   // алгоритм Луна
   var checkNumberByLun = function (number) {
     var numArr = number.split('').reverse();
@@ -497,23 +554,55 @@ var showOrderedAmountSumm = function () {
     return (results % 10 === 0) ? true : false;
   };
 
-  var bankCardInput = document.querySelector('#payment__card-number');
-
-  bankCardInput.addEventListener('blur', function () {
-    if (+bankCardInput.value > 0) {
-      if (!checkNumberByLun(bankCardInput.value)) {
-        bankCardInput.style.borderColor = 'red';
-        bankCardErrorMessadge.classList.remove('visually-hidden');
-      } else {
-        bankCardInput.style.borderColor = 'green';
-        bankCardSucsessMessadge.textContent = 'Подтверждена';
-        bankCardErrorMessadge.classList.add('visually-hidden');
-      }
+  emailInput.addEventListener('blur', function () {
+    if (emailInput.validity.patternMismatch) {
+      emailInput.setCustomValidity('Введите E-mail в формате mail@mail.ru');
     } else {
-      bankCardInput.style.borderColor = 'red';
+      emailInput.setCustomValidity('');
     }
   });
 
+  cardNumberInput.addEventListener('blur', function () {
+    if (cardNumberInput.value.length !== 16) {
+      cardNumberInput.style.borderColor = 'red';
+      cardNumberInput.setCustomValidity('Номер карты должен содержать 16 цифр');
+    } else {
+      if (!checkNumberByLun(cardNumberInput.value)) {
+        cardNumberInput.style.borderColor = 'red';
+        cardNumberInput.setCustomValidity('Неверный номер карты');
+        bankCardErrorMessadge.classList.remove('visually-hidden');
+      } else {
+        cardNumberInput.style.borderColor = 'green';
+        cardNumberInput.setCustomValidity('');
+        bankCardSucsessMessadge.textContent = 'Одобрен';
+        bankCardErrorMessadge.classList.add('visually-hidden');
+      }
+    }
+  });
+
+  dateInput.addEventListener('blur', function () {
+    if (dateInput.validity.patternMismatch) {
+      dateInput.setCustomValidity('Введите дату в формате ММ/ГГ');
+      dateInput.style.borderColor = 'red';
+    } else if (dateInput.value.length === 5) {
+      dateInput.setCustomValidity('');
+      dateInput.style.borderColor = 'green';
+    }
+  });
+
+  cvcNumberInput.addEventListener('blur', function () {
+    var cvcNumber = +cvcNumberInput.value;
+    if (cvcNumberInput.validity.patternMismatch) {
+      cvcNumberInput.setCustomValidity('CVC код должен состоять из цифр');
+      cvcNumberInput.style.borderColor = 'red';
+    } else if (cvcNumber < CVC_MIN) {
+      cvcNumberInput.style.borderColor = 'red';
+      cvcNumberInput.setCustomValidity('CVC код должен быть от 100 до 999');
+    } else {
+      cvcNumberInput.style.borderColor = 'green';
+      cvcNumberInput.setCustomValidity('');
+    }
+  });
 })();
 
 
