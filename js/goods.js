@@ -118,6 +118,9 @@ var GoodsData = {
 };
 
 var CVC_MIN = 100;
+var CARD_LENGTH = 16;
+var DATE_LENGTH = 5;
+var PIN_WIDTH = 10;
 
 var ratingStars = {
   1: 'stars__rating--one',
@@ -508,25 +511,134 @@ deliver.addEventListener('click', function (evt) {
   }
 });
 
-// первая фаза работы фильтра по цене
+// фильтр по цене
 (function () {
   var rangeFilter = document.querySelector('.range__filter');
   var rangeFilterWidth = getComputedStyle(rangeFilter).width.slice(0, -2);
-
+  var rangeLine = document.querySelector('.range__fill-line');
   var rangeBtnLeft = document.querySelector('.range__btn--left');
   var rangeBtnRight = document.querySelector('.range__btn--right');
   var rangePriceMin = document.querySelector('.range__price--min');
   var rangePriceMax = document.querySelector('.range__price--max');
+  var coordFieldMax = rangeFilter.offsetLeft + +rangeFilterWidth;
+  var coordFieldMin = rangeFilter.offsetLeft;
+  var moveFlag = false;
 
-  rangeBtnLeft.addEventListener('mouseup', function () {
-    var rangeBtnLeftX = getComputedStyle(rangeBtnLeft).left.slice(0, -2);
-    rangePriceMin.textContent = rangeBtnLeftX / rangeFilterWidth * 100;
-  });
+  var mouseDownHandler = function (evt) {
+    evt.preventDefault();
+    var startCoordsX = evt.clientX;
 
-  rangeBtnRight.addEventListener('mouseup', function () {
-    var rangeBtnRightX = getComputedStyle(rangeBtnRight).right.slice(0, -2);
-    rangePriceMax.textContent = 100 - rangeBtnRightX / rangeFilterWidth * 100;
-  });
+    var pinOptions = {};
+    if (evt.target.offsetLeft === rangeBtnLeft.offsetLeft) {
+      pinOptions = {
+        side: 'left',
+        minX: 0,
+        maxX: rangeBtnRight.offsetLeft - PIN_WIDTH,
+        coordXMax: coordFieldMin + rangeBtnRight.offsetLeft,
+        coordXMin: coordFieldMin
+      };
+    } else if (evt.target.offsetLeft === rangeBtnRight.offsetLeft) {
+      pinOptions = {
+        side: 'right',
+        minX: rangeBtnLeft.offsetLeft + PIN_WIDTH,
+        maxX: +rangeFilterWidth,
+        coordXMax: coordFieldMax,
+        coordXMin: coordFieldMin + rangeBtnLeft.offsetLeft
+      };
+    }
+
+    var mouseMoveHandler = function (moveEvt) {
+      moveFlag = true;
+      var shiftX = startCoordsX - moveEvt.clientX;
+
+      startCoordsX = moveEvt.clientX;
+      if (startCoordsX > pinOptions.coordXMax) {
+        startCoordsX = pinOptions.coordXMax;
+      } else if (startCoordsX < pinOptions.coordXMin) {
+        startCoordsX = pinOptions.coordXMin;
+      }
+
+      var newX = (evt.target.offsetLeft - shiftX);
+      if (newX < pinOptions.minX) {
+        newX = pinOptions.minX;
+      } else if (newX > pinOptions.maxX) {
+        newX = pinOptions.maxX;
+      }
+
+      var newValue = newX / rangeFilterWidth * 100;
+      var priceValue = Math.round(GoodsData.PRICES.max * newValue / 100);
+      evt.target.style.left = newValue + '%';
+
+      if (pinOptions.side === 'left') {
+        rangeLine.style.left = newValue + '%';
+        rangePriceMin.textContent = priceValue;
+      }
+
+      if (pinOptions.side === 'right') {
+        rangeLine.style.right = (100 - newValue) + '%';
+        rangePriceMax.textContent = priceValue;
+      }
+
+    };
+
+    var mouseUpHandler = function () {
+      if (pinOptions.side === 'left') {
+        rangePriceMin.textContent = Math.round(GoodsData.PRICES.max * evt.target.offsetLeft / rangeFilterWidth);
+      }
+
+      if (pinOptions.side === 'right') {
+        rangePriceMax.textContent = Math.round(GoodsData.PRICES.max * evt.target.offsetLeft / rangeFilterWidth);
+      }
+
+      document.removeEventListener('mousemove', mouseMoveHandler);
+      document.removeEventListener('mousemove', mouseUpHandler);
+    };
+
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+  };
+
+  var filterDownHandler = function (evt) {
+    evt.preventDefault();
+    moveFlag = false;
+
+    var filterUpHandler = function () {
+      if (moveFlag === false) {
+        var newX = evt.clientX - coordFieldMin - PIN_WIDTH / 2;
+        newX = (newX < 0) ? 0 : newX;
+
+        var newValue = newX / rangeFilterWidth * 100;
+        var priceValue = Math.round(GoodsData.PRICES.max * newValue / 100);
+
+        var changeValue = function (side) {
+          if (side === 'left') {
+            rangeBtnLeft.style.left = newValue + '%';
+            rangeLine.style.left = newValue + '%';
+            rangePriceMin.textContent = priceValue;
+          }
+
+          if (side === 'right') {
+            rangeBtnRight.style.left = newValue + '%';
+            rangeLine.style.right = (100 - newValue) + '%';
+            rangePriceMax.textContent = priceValue;
+          }
+        };
+
+        if (newX < (rangeFilterWidth / 2)) {
+          changeValue((newX < rangeBtnRight.offsetLeft) ? 'left' : 'right');
+        } else {
+          changeValue((newX > rangeBtnLeft.offsetLeft) ? 'right' : 'left');
+        }
+      }
+      document.removeEventListener('mouseup', filterUpHandler);
+    };
+    document.addEventListener('mouseup', filterUpHandler);
+  };
+
+  rangeBtnLeft.addEventListener('mousedown', mouseDownHandler);
+  rangeBtnRight.addEventListener('mousedown', mouseDownHandler);
+
+  rangeFilter.addEventListener('mousedown', filterDownHandler);
 })();
 
 // проверка банковской карты
@@ -563,7 +675,7 @@ deliver.addEventListener('click', function (evt) {
   });
 
   cardNumberInput.addEventListener('blur', function () {
-    if (cardNumberInput.value.length !== 16) {
+    if (cardNumberInput.value.length !== CARD_LENGTH) {
       cardNumberInput.style.borderColor = 'red';
       cardNumberInput.setCustomValidity('Номер карты должен содержать 16 цифр');
     } else {
@@ -584,7 +696,7 @@ deliver.addEventListener('click', function (evt) {
     if (dateInput.validity.patternMismatch) {
       dateInput.setCustomValidity('Введите дату в формате ММ/ГГ');
       dateInput.style.borderColor = 'red';
-    } else if (dateInput.value.length === 5) {
+    } else if (dateInput.value.length === DATE_LENGTH) {
       dateInput.setCustomValidity('');
       dateInput.style.borderColor = 'green';
     }
