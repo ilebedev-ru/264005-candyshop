@@ -3,16 +3,21 @@
 (function () {
   var PIN_WIDTH = 10;
 
-  var goodsData = window.goodsData.GoodsData;
+  var GoodsData = window.utils.GoodsData;
+
   var rangeFilter = document.querySelector('.range__filter');
   var rangeFilterWidth = getComputedStyle(rangeFilter).width.slice(0, -2);
   var rangeLine = document.querySelector('.range__fill-line');
+
   var rangeBtnLeft = document.querySelector('.range__btn--left');
   var rangeBtnRight = document.querySelector('.range__btn--right');
+
   var rangePriceMin = document.querySelector('.range__price--min');
   var rangePriceMax = document.querySelector('.range__price--max');
+
   var coordFieldMax = rangeFilter.offsetLeft + +rangeFilterWidth;
   var coordFieldMin = rangeFilter.offsetLeft;
+
   var moveFlag = false;
 
   var mouseDownHandler = function (evt) {
@@ -57,7 +62,7 @@
       }
 
       var newValue = newX / rangeFilterWidth * 100;
-      var priceValue = Math.round(goodsData.PRICES.max * newValue / 100);
+      var priceValue = Math.round(GoodsData.PRICES.max * newValue / 100);
       evt.target.style.left = newValue + '%';
 
       if (pinOptions.side === 'left') {
@@ -74,11 +79,11 @@
 
     var mouseUpHandler = function () {
       if (pinOptions.side === 'left') {
-        rangePriceMin.textContent = Math.round(goodsData.PRICES.max * evt.target.offsetLeft / rangeFilterWidth);
+        rangePriceMin.textContent = Math.round(GoodsData.PRICES.max * evt.target.offsetLeft / rangeFilterWidth);
       }
 
       if (pinOptions.side === 'right') {
-        rangePriceMax.textContent = Math.round(goodsData.PRICES.max * evt.target.offsetLeft / rangeFilterWidth);
+        rangePriceMax.textContent = Math.round(GoodsData.PRICES.max * evt.target.offsetLeft / rangeFilterWidth);
       }
 
       document.removeEventListener('mousemove', mouseMoveHandler);
@@ -99,7 +104,7 @@
         newX = (newX < 0) ? 0 : newX;
 
         var newValue = newX / rangeFilterWidth * 100;
-        var priceValue = Math.round(goodsData.PRICES.max * newValue / 100);
+        var priceValue = Math.round(GoodsData.PRICES.max * newValue / 100);
 
         var changeValue = function (side) {
           if (side === 'left') {

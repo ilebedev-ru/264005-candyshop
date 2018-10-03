@@ -126,6 +126,15 @@
     5: 'stars__rating--five'
   };
 
+  var paymentValidateParam = {
+    CVC_MIN: 100,
+    CARD_LENGTH: 16,
+    DATE_LENGTH: 5
+  };
+
+  var buyForm = document.querySelector('.buy form');
+  var buyFormInputs = buyForm.querySelectorAll('input');
+
   var getRandomNumber = function (min, max) {
     var rand = min - 0.5 + Math.random() * (max - min + 1);
     rand = Math.round(rand);
@@ -155,41 +164,60 @@
     return randomContent;
   };
 
-  var createGoodsItem = function (goodsData, i) {
-    var goodsItem = {
-      name: shuffleArray(goodsData.NAMES)[i],
-      picture: goodsData.PICTURES[getRandomNumber(0, goodsData.PICTURES.length - 1)],
-      amount: getRandomNumber(goodsData.AMOUNTS.min, goodsData.AMOUNTS.max),
-      price: getRandomNumber(goodsData.PRICES.min, goodsData.PRICES.max),
-      weight: getRandomNumber(goodsData.WEIGHTS.min, goodsData.WEIGHTS.max),
-      Rating: {
-        value: getRandomNumber(goodsData.RATING_VALUES.min, goodsData.RATING_VALUES.max),
-        number: getRandomNumber(goodsData.RATING_NUMBERS.min, goodsData.RATING_NUMBERS.max)
-      },
-      NutritionFact: {
-        sugar: getRandomBoolean(),
-        energy: getRandomNumber(goodsData.NUTRITION_FACTS_ENERGYS.min, goodsData.NUTRITION_FACTS_ENERGYS.max),
-        contents: getRandomContent(goodsData.NUTRITION_FACTS_CONTENT)
+  var getDataItem = function (evt, clickArea, className) {
+    var target = evt.target;
+
+    while (target !== clickArea) {
+      if (target.classList.contains(className)) {
+        return target.dataset.item;
       }
-    };
-
-    return goodsItem;
-  };
-
-  var createGoodsCollection = function (goodsData, num) {
-    var collection = [];
-
-    for (var i = 0; i < num; i++) {
-      collection[i] = createGoodsItem(goodsData, i);
+      target = target.parentElement;
     }
-    return collection;
+    return target;
   };
 
-  var goodsCollection = createGoodsCollection(GoodsData, GoodsData.NUMBER);
+  var getArrIndex = function (arr, property) {
+    var arrIndex = '';
+    for (var i = 0; i < arr.length; i++) {
+      if (+arr[i].dataItem === +property) {
+        arrIndex = i;
+      }
+    }
+    return arrIndex;
+  };
 
-  window.goodsData = {
+  var disabledBuyForm = function (boolean) {
+    for (var i = 0; i < buyFormInputs.length; i++) {
+      buyFormInputs[i].disabled = boolean;
+    }
+  };
+
+  var checkNumberByLun = function (number) {
+    var numArr = number.split('').reverse();
+    var results = 0;
+
+    for (var i = 0; i < numArr.length; i++) {
+      if (i % 2 !== 0) {
+        var evenNum = +numArr[i] * 2;
+        results += (evenNum > 9) ? evenNum -= 9 : evenNum;
+      } else {
+        results += +numArr[i];
+      }
+    }
+    return (results % 10 === 0) ? true : false;
+  };
+
+  window.utils = {
     GoodsData: GoodsData,
     ratingStars: ratingStars,
-    goodsCollection: goodsCollection,
+    paymentValidateParam: paymentValidateParam,
+    getRandomNumber: getRandomNumber,
+    getRandomBoolean: getRandomBoolean,
+    shuffleArray: shuffleArray,
+    getRandomContent: getRandomContent,
+    disabledBuyForm: disabledBuyForm,
+    getDataItem: getDataItem,
+    getArrIndex: getArrIndex,
+    checkNumberByLun: checkNumberByLun
   };
 })();

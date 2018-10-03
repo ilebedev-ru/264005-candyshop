@@ -1,9 +1,8 @@
 'use strict';
 
 (function () {
-  var CVC_MIN = 100;
-  var CARD_LENGTH = 16;
-  var DATE_LENGTH = 5;
+  var paymentValidateParam = window.utils.paymentValidateParam;
+  var checkNumberByLun = window.utils.checkNumberByLun;
 
   var payment = document.querySelector('.payment');
   var paymentCard = payment.querySelector('.payment__card-wrap');
@@ -42,7 +41,6 @@
       }
     }
   };
-
 
   // переключение владки доставки
   var toggleDeliver = function (type) {
@@ -84,21 +82,6 @@
     }
   });
 
-  var checkNumberByLun = function (number) {
-    var numArr = number.split('').reverse();
-    var results = 0;
-
-    for (var i = 0; i < numArr.length; i++) {
-      if (i % 2 !== 0) {
-        var evenNum = +numArr[i] * 2;
-        results += (evenNum > 9) ? evenNum -= 9 : evenNum;
-      } else {
-        results += +numArr[i];
-      }
-    }
-    return (results % 10 === 0) ? true : false;
-  };
-
   emailInput.addEventListener('blur', function () {
     if (emailInput.validity.patternMismatch) {
       emailInput.setCustomValidity('Введите E-mail в формате mail@mail.ru');
@@ -108,7 +91,7 @@
   });
 
   cardNumberInput.addEventListener('blur', function () {
-    if (cardNumberInput.value.length !== CARD_LENGTH) {
+    if (cardNumberInput.value.length !== paymentValidateParam.CARD_LENGTH) {
       cardNumberInput.style.borderColor = 'red';
       cardNumberInput.setCustomValidity('Номер карты должен содержать 16 цифр');
     } else {
@@ -129,7 +112,7 @@
     if (dateInput.validity.patternMismatch) {
       dateInput.setCustomValidity('Введите дату в формате ММ/ГГ');
       dateInput.style.borderColor = 'red';
-    } else if (dateInput.value.length === DATE_LENGTH) {
+    } else if (dateInput.value.length === paymentValidateParam.DATE_LENGTH) {
       dateInput.setCustomValidity('');
       dateInput.style.borderColor = 'green';
     }
@@ -140,7 +123,7 @@
     if (cvcNumberInput.validity.patternMismatch) {
       cvcNumberInput.setCustomValidity('CVC код должен состоять из цифр');
       cvcNumberInput.style.borderColor = 'red';
-    } else if (cvcNumber < CVC_MIN) {
+    } else if (cvcNumber < paymentValidateParam.CVC_MIN) {
       cvcNumberInput.style.borderColor = 'red';
       cvcNumberInput.setCustomValidity('CVC код должен быть от 100 до 999');
     } else {
