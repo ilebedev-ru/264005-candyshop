@@ -118,7 +118,7 @@
     NUMBER: 26
   };
 
-  var ratingStars = {
+  var starsToClassName = {
     1: 'stars__rating--one',
     2: 'stars__rating--two',
     3: 'stars__rating--three',
@@ -131,9 +131,6 @@
     CARD_LENGTH: 16,
     DATE_LENGTH: 5
   };
-
-  var buyForm = document.querySelector('.buy form');
-  var buyFormInputs = buyForm.querySelectorAll('input');
 
   var getRandomNumber = function (min, max) {
     var rand = min - 0.5 + Math.random() * (max - min + 1);
@@ -186,12 +183,6 @@
     return arrIndex;
   };
 
-  var disabledBuyForm = function (boolean) {
-    for (var i = 0; i < buyFormInputs.length; i++) {
-      buyFormInputs[i].disabled = boolean;
-    }
-  };
-
   var checkNumberByLun = function (number) {
     var numArr = number.split('').reverse();
     var results = 0;
@@ -209,13 +200,12 @@
 
   window.utils = {
     GoodsData: GoodsData,
-    ratingStars: ratingStars,
+    starsToClassName: starsToClassName,
     paymentValidateParam: paymentValidateParam,
     getRandomNumber: getRandomNumber,
     getRandomBoolean: getRandomBoolean,
     shuffleArray: shuffleArray,
     getRandomContent: getRandomContent,
-    disabledBuyForm: disabledBuyForm,
     getDataItem: getDataItem,
     getArrIndex: getArrIndex,
     checkNumberByLun: checkNumberByLun

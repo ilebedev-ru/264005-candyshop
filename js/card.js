@@ -1,14 +1,24 @@
 'use strict';
 
 (function () {
-  var disabledBuyForm = window.utils.disabledBuyForm;
   var getDataItem = window.utils.getDataItem;
   var getArrIndex = window.utils.getArrIndex;
+  var togglePayment = window.orderFormValidate.togglePayment;
+  var toggleDeliver = window.orderFormValidate.toggleDeliver;
+
+  var buyForm = document.querySelector('.buy form');
+  var buyFormInputs = buyForm.querySelectorAll('input');
 
   var goodsInCardCollection = [];
   var goodsCardTemplate = document.querySelector('#card-order').content.querySelector('.goods_card');
   var goodsCards = document.querySelector('.goods__cards');
   var basketCount = document.querySelector('.main-header__basket');
+
+  var disabledBuyForm = function (boolean) {
+    for (var i = 0; i < buyFormInputs.length; i++) {
+      buyFormInputs[i].disabled = boolean;
+    }
+  };
 
   disabledBuyForm(true);
 
@@ -24,8 +34,8 @@
     var goodsCardCopy = Object.assign({}, item);
     goodsCardCopy.dataItem = index;
     disabledBuyForm(false);
-    window.orderFormValidate.togglePayment('payment__card');
-    window.orderFormValidate.toggleDeliver('deliver__store');
+    togglePayment('payment__card');
+    toggleDeliver('deliver__store');
 
     if (goodsInCardCollection.length === 0) {
       goodsCards.classList.remove('goods__cards--empty');
@@ -39,9 +49,8 @@
             showOrderedAmount(goodsInCardCollection[i]);
             showOrderedAmountSumm();
             return;
-          } else {
-            return;
           }
+          return;
         }
       }
       addNewGoodsInCard(goodsCardCopy);
@@ -122,7 +131,5 @@
     }
   });
 
-  window.card = {
-    copyGoodsToCard: copyGoodsToCard
-  };
+  window.copyGoodsToCard = copyGoodsToCard;
 })();

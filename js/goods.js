@@ -7,6 +7,8 @@
   var getRandomBoolean = window.utils.getRandomBoolean;
   var getRandomContent = window.utils.getRandomContent;
   var getDataItem = window.utils.getDataItem;
+  var copyGoodsToCard = window.copyGoodsToCard;
+  var starsToClassName = window.utils.starsToClassName;
 
   var catalogCards = document.querySelector('.catalog__cards');
   var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
@@ -37,7 +39,7 @@
     putClassOnElementAmount(goodsElement, item.amount);
 
     goodsElement.querySelector('.stars__rating').classList.remove('stars__rating--five');
-    goodsElement.querySelector('.stars__rating').classList.add(window.utils.ratingStars[item.Rating.value]);
+    goodsElement.querySelector('.stars__rating').classList.add(starsToClassName[item.Rating.value]);
     goodsElement.querySelector('.star__count').textContent = item.Rating.number;
     goodsElement.querySelector('.card__characteristic').textContent = item.NutritionFact.sugar ? 'Содержит сахар' : 'Без сахара';
     goodsElement.querySelector('.card__composition-list').textContent = item.NutritionFact.contents;
@@ -97,7 +99,7 @@
       evt.preventDefault();
 
       if (activeCard.amount > 0) {
-        window.card.copyGoodsToCard(activeCard, dataItem);
+        copyGoodsToCard(activeCard, dataItem);
       }
     }
 
