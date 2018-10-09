@@ -21,19 +21,25 @@
   var moveFlag = false;
 
   var findMaxPrice = function (data) {
-    var prices = [];
-    for (var i = 0; i < data.length; i++) {
-      prices[i] = data[i].price;
-    }
+    var prices = data.map(function (goodsData) {
+      return goodsData.price;
+    });
 
     return findMaxValue(prices);
+  };
+
+  var findPriceValue = function (data) {
+    var maxPrice = findMaxPrice(data);
+
+    rangePriceMin.textContent = Math.round(maxPrice * rangeBtnLeft.offsetLeft / rangeFilterWidth);
+    rangePriceMax.textContent = Math.round(maxPrice * rangeBtnRight.offsetLeft / rangeFilterWidth);
   };
 
   var mouseDownHandler = function (evt) {
     evt.preventDefault();
     var startCoordsX = evt.clientX;
 
-    var maxPrice = findMaxPrice(window.GoodsData);
+    var maxPrice = findMaxPrice(window.goodsData);
 
     var pinOptions = {};
     if (evt.target.offsetLeft === rangeBtnLeft.offsetLeft) {
@@ -89,14 +95,6 @@
     };
 
     var mouseUpHandler = function () {
-      if (pinOptions.side === 'left') {
-        rangePriceMin.textContent = Math.round(maxPrice * evt.target.offsetLeft / rangeFilterWidth);
-      }
-
-      if (pinOptions.side === 'right') {
-        rangePriceMax.textContent = Math.round(maxPrice * evt.target.offsetLeft / rangeFilterWidth);
-      }
-
       document.removeEventListener('mousemove', mouseMoveHandler);
       document.removeEventListener('mousemove', mouseUpHandler);
     };
@@ -109,7 +107,7 @@
     evt.preventDefault();
     moveFlag = false;
 
-    var maxPrice = findMaxPrice(window.GoodsData);
+    var maxPrice = findMaxPrice(window.goodsData);
 
     var filterUpHandler = function () {
       if (moveFlag === false) {
@@ -148,4 +146,6 @@
   rangeBtnRight.addEventListener('mousedown', mouseDownHandler);
 
   rangeFilter.addEventListener('mousedown', filterDownHandler);
+
+  window.findPriceValue = findPriceValue;
 })();

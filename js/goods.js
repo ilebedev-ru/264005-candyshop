@@ -5,6 +5,7 @@
   var getDataItem = window.utils.getDataItem;
   var copyGoodsToCard = window.cards.copyGoodsToCard;
   var starsToClassName = window.utils.starsToClassName;
+  var findPriceValue = window.findPriceValue;
 
   var catalogCards = document.querySelector('.catalog__cards');
   var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
@@ -59,7 +60,7 @@
   };
 
   var createGoodsCollection = function (goods) {
-    window.GoodsData = goods;
+    window.goodsData = goods;
     var fragment = document.createDocumentFragment();
 
     for (var i = 0; i < goods.length; i++) {
@@ -67,6 +68,8 @@
     }
 
     catalogCards.appendChild(fragment);
+
+    findPriceValue(goods);
 
     catalogCards.classList.remove('catalog__cards--load');
     catalogCards.querySelector('.catalog__load').classList.add('visually-hidden');
@@ -84,7 +87,7 @@
 
   catalogCards.addEventListener('click', function (evt) {
     var dataItem = getDataItem(evt, catalogCards, 'catalog__card');
-    var activeCard = window.GoodsData[dataItem];
+    var activeCard = window.goodsData[dataItem];
 
     // добавление в корзину
     if (evt.target.classList.contains('card__btn')) {
