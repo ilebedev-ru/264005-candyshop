@@ -161,7 +161,7 @@
     }
   });
 
-  var saveSuccessHandler = function () {
+  var showSuccessModal = function () {
     modalSuccess.classList.remove('modal--hidden');
     form.reset();
     window.cards.clearCard();
@@ -170,7 +170,7 @@
     document.addEventListener('keydown', keydownEscSuccModalHandler);
   };
 
-  var saveErrorHandler = function (errorMessage) {
+  var showError = function (errorMessage) {
     modalError.classList.remove('modal--hidden');
     modalError.querySelector('.modal__message').textContent = errorMessage;
 
@@ -181,7 +181,7 @@
   form.addEventListener('submit', function (evt) {
     evt.preventDefault();
 
-    window.backend.save(new FormData(form), saveSuccessHandler, saveErrorHandler);
+    window.backend.save(new FormData(form), showSuccessModal, showError);
   });
 
   window.orderFormValidate = {

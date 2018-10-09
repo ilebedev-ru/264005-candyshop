@@ -4,51 +4,39 @@
   var LOAD_URL = 'https://js.dump.academy/candyshop/data';
   var SAVE_URL = 'https://js.dump.academy/candyshop';
 
-  var load = function (loadSuccessHandler, loadErrorHandler) {
+  var createXhr = function (timeout, succHandler, errHandler) {
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
+    xhr.timeout = timeout;
 
     xhr.addEventListener('load', function () {
       if (xhr.status === 200) {
-        loadSuccessHandler(xhr.response);
+        succHandler(xhr.response);
       } else {
-        loadErrorHandler('Статус ответа: ' + xhr.status + ' ' + xhr.statusText);
+        errHandler('Статус ответа: ' + xhr.status + ' ' + xhr.statusText);
       }
-
     });
 
     xhr.addEventListener('error', function () {
-      loadErrorHandler('Произошла ошибка соединения');
+      errHandler('Произошла ошибка');
     });
+
     xhr.addEventListener('timeout', function () {
-      loadErrorHandler('Запрос не успел выполниться за ' + xhr.timeout + 'мс');
+      errHandler('Запрос не успел выполниться за ' + xhr.timeout + 'мс');
     });
+    return xhr;
+  };
 
-    xhr.timeout = 10000;
-
-    xhr.open('GET', LOAD_URL);
-    xhr.send();
+  var load = function (loadSuccessHandler, loadErrorHandler) {
+    var loadXhr = createXhr(10000, loadSuccessHandler, loadErrorHandler);
+    loadXhr.open('GET', LOAD_URL);
+    loadXhr.send();
   };
 
   var save = function (saveData, saveSuccessHandler, saveErrorHandler) {
-    var xhr = new XMLHttpRequest();
-    xhr.responseType = 'json';
-
-    xhr.addEventListener('load', function () {
-      if (xhr.status === 200) {
-        saveSuccessHandler(xhr.response);
-      } else {
-        saveErrorHandler('Статус ответа: ' + xhr.status + ' ' + xhr.statusText);
-      }
-
-    });
-
-    xhr.addEventListener('error', function () {
-      saveErrorHandler('Произошла ошибка отправки формы');
-    });
-
-    xhr.open('POST', SAVE_URL);
-    xhr.send(saveData);
+    var saveXhr = createXhr(10000, saveSuccessHandler, saveErrorHandler);
+    saveXhr.open('POST', SAVE_URL);
+    saveXhr.send(saveData);
   };
 
   window.backend = {

@@ -58,7 +58,7 @@
     return goodsElement;
   };
 
-  var loadSuccessHandler = function (goods) {
+  var createGoodsCollection = function (goods) {
     window.GoodsData = goods;
     var fragment = document.createDocumentFragment();
 
@@ -72,7 +72,7 @@
     catalogCards.querySelector('.catalog__load').classList.add('visually-hidden');
   };
 
-  var loadErrorHandler = function (errorMessage) {
+  var showLoadError = function (errorMessage) {
     modalError.classList.remove('modal--hidden');
     modalError.querySelector('.modal__message').textContent = errorMessage;
 
@@ -80,7 +80,7 @@
     document.addEventListener('keydown', keydownEscModalHandler);
   };
 
-  window.backend.load(loadSuccessHandler, loadErrorHandler);
+  window.backend.load(createGoodsCollection, showLoadError);
 
   catalogCards.addEventListener('click', function (evt) {
     var dataItem = getDataItem(evt, catalogCards, 'catalog__card');
