@@ -1,8 +1,15 @@
 'use strict';
 
 (function () {
+  var ESC_KEYCODE = window.utils.ESC_KEYCODE;
   var paymentValidateParam = window.utils.paymentValidateParam;
   var checkNumberByLun = window.utils.checkNumberByLun;
+
+  var form = document.querySelector('.buy form');
+  var modalSuccess = document.querySelector('.modal--success');
+  var modalError = document.querySelector('.modal--error');
+  var errorCloseBtn = modalError.querySelector('.modal__close');
+  var succesCloseBtn = modalSuccess.querySelector('.modal__close');
 
   var payment = document.querySelector('.payment');
   var paymentCard = payment.querySelector('.payment__card-wrap');
@@ -22,6 +29,28 @@
   var deliverСourierInputs = deliver.querySelectorAll('.deliver__address-entry-fields input');
   var deliverStoreInputs = deliver.querySelectorAll('.deliver__store-list input');
   var deliverStoreImg = deliver.querySelector('.deliver__store-map-img');
+
+  var clickErrCloseBtnHandler = function () {
+    modalError.classList.add('modal--hidden');
+  };
+
+  var keydownEscErrModalHandler = function (evt) {
+    if (evt.keyCode === ESC_KEYCODE) {
+      clickErrCloseBtnHandler();
+      document.removeEventListener('keydown', keydownEscErrModalHandler);
+    }
+  };
+
+  var clickSuccCloseBtnHandler = function () {
+    modalSuccess.classList.add('modal--hidden');
+  };
+
+  var keydownEscSuccModalHandler = function (evt) {
+    if (evt.keyCode === ESC_KEYCODE) {
+      clickSuccCloseBtnHandler();
+      document.removeEventListener('keydown', keydownEscSuccModalHandler);
+    }
+  };
 
   // переключение владки оплаты
   var togglePayment = function (type) {
@@ -130,6 +159,29 @@
       cvcNumberInput.style.borderColor = 'green';
       cvcNumberInput.setCustomValidity('');
     }
+  });
+
+  var showSuccessModal = function () {
+    modalSuccess.classList.remove('modal--hidden');
+    form.reset();
+    window.cards.clearCard();
+
+    succesCloseBtn.addEventListener('click', clickSuccCloseBtnHandler);
+    document.addEventListener('keydown', keydownEscSuccModalHandler);
+  };
+
+  var showError = function (errorMessage) {
+    modalError.classList.remove('modal--hidden');
+    modalError.querySelector('.modal__message').textContent = errorMessage;
+
+    errorCloseBtn.addEventListener('click', clickErrCloseBtnHandler);
+    document.addEventListener('keydown', keydownEscErrModalHandler);
+  };
+
+  form.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+
+    window.backend.save(new FormData(form), showSuccessModal, showError);
   });
 
   window.orderFormValidate = {

@@ -3,7 +3,7 @@
 (function () {
   var PIN_WIDTH = 10;
 
-  var GoodsData = window.utils.GoodsData;
+  var findMaxValue = window.utils.findMaxValue;
 
   var rangeFilter = document.querySelector('.range__filter');
   var rangeFilterWidth = getComputedStyle(rangeFilter).width.slice(0, -2);
@@ -20,9 +20,26 @@
 
   var moveFlag = false;
 
+  var findMaxPrice = function (data) {
+    var prices = data.map(function (goodsData) {
+      return goodsData.price;
+    });
+
+    return findMaxValue(prices);
+  };
+
+  var findPriceValue = function (data) {
+    var maxPrice = findMaxPrice(data);
+
+    rangePriceMin.textContent = Math.round(maxPrice * rangeBtnLeft.offsetLeft / rangeFilterWidth);
+    rangePriceMax.textContent = Math.round(maxPrice * rangeBtnRight.offsetLeft / rangeFilterWidth);
+  };
+
   var mouseDownHandler = function (evt) {
     evt.preventDefault();
     var startCoordsX = evt.clientX;
+
+    var maxPrice = findMaxPrice(window.goodsData);
 
     var pinOptions = {};
     if (evt.target.offsetLeft === rangeBtnLeft.offsetLeft) {
@@ -62,7 +79,7 @@
       }
 
       var newValue = newX / rangeFilterWidth * 100;
-      var priceValue = Math.round(GoodsData.PRICES.max * newValue / 100);
+      var priceValue = Math.round(maxPrice * newValue / 100);
       evt.target.style.left = newValue + '%';
 
       if (pinOptions.side === 'left') {
@@ -78,14 +95,6 @@
     };
 
     var mouseUpHandler = function () {
-      if (pinOptions.side === 'left') {
-        rangePriceMin.textContent = Math.round(GoodsData.PRICES.max * evt.target.offsetLeft / rangeFilterWidth);
-      }
-
-      if (pinOptions.side === 'right') {
-        rangePriceMax.textContent = Math.round(GoodsData.PRICES.max * evt.target.offsetLeft / rangeFilterWidth);
-      }
-
       document.removeEventListener('mousemove', mouseMoveHandler);
       document.removeEventListener('mousemove', mouseUpHandler);
     };
@@ -98,13 +107,15 @@
     evt.preventDefault();
     moveFlag = false;
 
+    var maxPrice = findMaxPrice(window.goodsData);
+
     var filterUpHandler = function () {
       if (moveFlag === false) {
         var newX = evt.clientX - coordFieldMin - PIN_WIDTH / 2;
         newX = (newX < 0) ? 0 : newX;
 
         var newValue = newX / rangeFilterWidth * 100;
-        var priceValue = Math.round(GoodsData.PRICES.max * newValue / 100);
+        var priceValue = Math.round(maxPrice * newValue / 100);
 
         var changeValue = function (side) {
           if (side === 'left') {
@@ -135,4 +146,6 @@
   rangeBtnRight.addEventListener('mousedown', mouseDownHandler);
 
   rangeFilter.addEventListener('mousedown', filterDownHandler);
+
+  window.findPriceValue = findPriceValue;
 })();
