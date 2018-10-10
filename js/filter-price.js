@@ -14,6 +14,7 @@
 
   var rangePriceMin = document.querySelector('.range__price--min');
   var rangePriceMax = document.querySelector('.range__price--max');
+  var rangeCount = document.querySelector('.range__count');
 
   var coordFieldMax = rangeFilter.offsetLeft + +rangeFilterWidth;
   var coordFieldMin = rangeFilter.offsetLeft;
@@ -25,11 +26,19 @@
       return goodsData.price;
     });
 
+    rangeCount.textContent = '(' + data.length + ')';
+
     return findMaxValue(prices);
   };
 
   var findPriceValue = function (data) {
     var maxPrice = findMaxPrice(data);
+
+    rangeBtnLeft.style.left = 0;
+    rangeLine.style.left = 0;
+
+    rangeBtnRight.style.left = rangeFilterWidth + 'px';
+    rangeLine.style.right = 0;
 
     rangePriceMin.textContent = Math.round(maxPrice * rangeBtnLeft.offsetLeft / rangeFilterWidth);
     rangePriceMax.textContent = Math.round(maxPrice * rangeBtnRight.offsetLeft / rangeFilterWidth);

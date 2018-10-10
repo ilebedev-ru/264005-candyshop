@@ -6,12 +6,19 @@
   var copyGoodsToCard = window.cards.copyGoodsToCard;
   var starsToClassName = window.utils.starsToClassName;
   var findPriceValue = window.findPriceValue;
+  var findGoodsNumber = window.findGoodsNumber;
 
   var catalogCards = document.querySelector('.catalog__cards');
   var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
+  var emptyFiltersTemplate = document.querySelector('#empty-filters').content.querySelector('.catalog__empty-filter');
 
   var modalError = document.querySelector('.modal--error');
   var errorCloseBtn = modalError.querySelector('.modal__close');
+
+  var favoriteInput = document.querySelector('#filter-favorite');
+  var favoriteAmoutValue = favoriteInput.parentNode.querySelector('.input-btn__item-count');
+
+  var favoriteList = [];
 
   var clickErrCloseBtnHandler = function () {
     modalError.classList.add('modal--hidden');
@@ -36,7 +43,7 @@
     }
   };
 
-  var createGoodsElement = function (item, i) {
+  var createGoodsElement = function (item) {
     var goodsElement = catalogCardTemplate.cloneNode(true);
 
     goodsElement.querySelector('.card__title').textContent = item.name;
@@ -54,7 +61,7 @@
     goodsElement.querySelector('.star__count').textContent = item.rating.number;
     goodsElement.querySelector('.card__characteristic').textContent = item.nutritionFacts.sugar ? 'Содержит сахар' : 'Без сахара';
     goodsElement.querySelector('.card__composition-list').textContent = item.nutritionFacts.contents;
-    goodsElement.dataset.item = i;
+    // goodsElement.dataset.item = i;
 
     return goodsElement;
   };
@@ -64,12 +71,20 @@
     var fragment = document.createDocumentFragment();
 
     for (var i = 0; i < goods.length; i++) {
-      fragment.appendChild(createGoodsElement(goods[i], i));
+      var newGoodsElement = createGoodsElement(goods[i]);
+      newGoodsElement.dataset.item = i;
+      fragment.appendChild(newGoodsElement);
     }
+
+    // for (var i = 0; i < goods.length; i++) {
+    //   var newGoodsElement =
+    //   fragment.appendChild(createGoodsElement(goods[i], i));
+    // }
 
     catalogCards.appendChild(fragment);
 
     findPriceValue(goods);
+    findGoodsNumber(goods);
 
     catalogCards.classList.remove('catalog__cards--load');
     catalogCards.querySelector('.catalog__load').classList.add('visually-hidden');
@@ -84,6 +99,19 @@
   };
 
   window.backend.load(createGoodsCollection, showLoadError);
+
+  var updateGoodsCollection = function (newGoods) {
+    catalogCards.innerHTML = '';
+    if (newGoods.length === 0) {
+      catalogCards.appendChild(emptyFiltersTemplate.cloneNode(true));
+    } else {
+      var fragment = document.createDocumentFragment();
+      for (var i = 0; i < newGoods.length; i++) {
+        fragment.appendChild(createGoodsElement(newGoods[i], i));
+      }
+      catalogCards.appendChild(fragment);
+    }
+  };
 
   catalogCards.addEventListener('click', function (evt) {
     var dataItem = getDataItem(evt, catalogCards, 'catalog__card');
@@ -112,6 +140,18 @@
     if (evt.target.classList.contains('card__btn-favorite')) {
       evt.preventDefault();
       evt.target.classList.toggle('card__btn-favorite--selected');
+
+      if (favoriteList.indexOf(activeCard) === -1) {
+        favoriteList.push(activeCard);
+      } else {
+        var favoriteId = favoriteList.indexOf(activeCard);
+        favoriteList.splice(favoriteId, 1);
+      };
+
+      favoriteAmoutValue.textContent = '(' + favoriteList.length + ')'
+      window.favoriteList = favoriteList;
     }
   });
+
+  window.updateGoodsCollection = updateGoodsCollection;
 })();
