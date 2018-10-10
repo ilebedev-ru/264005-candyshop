@@ -25,7 +25,13 @@
   disabledBuyForm(true);
 
   var showOrderedAmount = function (item) {
-    var activeCard = goodsCards.querySelector('[data-item="' + item.dataItem + '"]');
+    var allCards = goodsCards.querySelectorAll('.card-order');
+    for (var i = 0; i < allCards.length; i++) {
+      if (allCards[i].querySelector('.card-order__title').textContent === item.name) {
+        var activeCard = allCards[i];
+      }
+    }
+
     activeCard.querySelector('.card-order__count').value = item.orderedAmount;
   };
 
@@ -85,7 +91,7 @@
   };
 
   var clearCard = function () {
-    var allGoodsInCardElement = goodsCards.querySelectorAll('[data-item]');
+    var allGoodsInCardElement = goodsCards.querySelectorAll('.card-order');
     goodsInCardCollection.splice(0, goodsInCardCollection.length);
 
     for (var i = 0; i < allGoodsInCardElement.length; i++) {
@@ -109,16 +115,15 @@
     goodsInCardElement.querySelector('.card-order__price').textContent = item.price + ' ₽';
     goodsInCardElement.querySelector('.card-order__count').value = item.orderedAmount;
     goodsInCardElement.querySelector('.card-order__count').name = item.name;
-    goodsInCardElement.dataset.item = item.dataItem;
 
     return goodsInCardElement;
   };
 
   goodsCards.addEventListener('click', function (evt) {
-    var dataItemInCard = getDataItem(evt, goodsCards, 'goods_card');
+    var dataItemInCard = getDataItem(evt, goodsCards, 'goods_card', '.card-order__title');
     var cardCollectionIndex = getArrIndex(goodsInCardCollection, dataItemInCard);
     var activeItemInCard = goodsInCardCollection[cardCollectionIndex];
-    var allGoodsInCardElement = goodsCards.querySelectorAll('[data-item]');
+    var allGoodsInCardElement = goodsCards.querySelectorAll('.card-order');
 
     // удаление товара
     if (evt.target.classList.contains('card-order__close')) {

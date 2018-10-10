@@ -46,12 +46,12 @@
     return randomContent;
   };
 
-  var getDataItem = function (evt, clickArea, className) {
+  var getDataItem = function (evt, clickArea, className, title) {
     var target = evt.target;
 
     while (target !== clickArea) {
       if (target.classList.contains(className)) {
-        return target.dataset.item;
+        return target.querySelector(title).textContent;
       }
       target = target.parentElement;
     }
@@ -61,7 +61,7 @@
   var getArrIndex = function (arr, property) {
     var arrIndex = '';
     for (var i = 0; i < arr.length; i++) {
-      if (+arr[i].dataItem === +property) {
+      if (arr[i].name === property) {
         arrIndex = i;
       }
     }
@@ -93,6 +93,16 @@
     return (results % 10 === 0) ? true : false;
   };
 
+  var unique = function (arr) {
+    var result = [];
+    for (var i = 0, l = arr.length; i < l; i++) {
+      if (result.indexOf(arr[i]) === -1 && arr[i] !== '') {
+        result.push(arr[i]);
+      }
+    }
+    return result;
+  };
+
   window.utils = {
     ESC_KEYCODE: ESC_KEYCODE,
     starsToClassName: starsToClassName,
@@ -104,6 +114,7 @@
     getRandomContent: getRandomContent,
     getDataItem: getDataItem,
     getArrIndex: getArrIndex,
-    checkNumberByLun: checkNumberByLun
+    checkNumberByLun: checkNumberByLun,
+    unique: unique
   };
 })();

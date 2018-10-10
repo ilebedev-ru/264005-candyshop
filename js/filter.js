@@ -1,7 +1,8 @@
 'use strict';
 
 (function () {
-  findPriceValue = window.findPriceValue;
+  var findPriceValue = window.findPriceValue;
+  var unique = window.utils.unique;
 
   var filterArea = document.querySelector('.catalog__sidebar');
   var filteredGoods = [];
@@ -22,131 +23,124 @@
 
   for (var i = 0; i < typeFilterInputs.length; i++) {
     typeInputsContainers[i] = typeFilterInputs[i].parentNode;
-  };
+  }
 
-  for (var i = 0; i < propertyFilterInputs.length; i++) {
-    propertyInputsContainers[i] = propertyFilterInputs[i].parentNode;
-  };
-
-  var compareNumeric = function (a, b) {
-    if (a > b) return 1;
-    if (a < b) return -1;
-  };
+  for (var j = 0; j < propertyFilterInputs.length; j++) {
+    propertyInputsContainers[j] = propertyFilterInputs[j].parentNode;
+  }
 
   var findGoodsNumber = function (goods) {
     // тип товара
     typeInputsContainers.forEach(function (item) {
       var typeName = item.querySelector('label').textContent;
-      var i = 0;
-      goods.forEach(function (item) {
-        if(item.kind === typeName) {
-          i++;
+      var k = 0;
+      goods.forEach(function (good) {
+        if (good.kind === typeName) {
+          k++;
         }
-        return i;
+        return k;
       });
-      item.querySelector('.input-btn__item-count').textContent = '(' + i + ')'
+      item.querySelector('.input-btn__item-count').textContent = '(' + k + ')';
     });
 
     // характеристика товара
-    goods.forEach(function (item, i) {
-      nutritionFacts.forEach(function (item, j) {
+    goods.forEach(function (item, q) {
+      nutritionFacts.forEach(function (fact, u) {
 
-        if (item === 'vegetarian') {
-          if (goods[i].nutritionFacts[item] === true) {
-            nutritionFactsCounts[j]++;
+        if (fact === 'vegetarian') {
+          if (goods[q].nutritionFacts[fact] === true) {
+            nutritionFactsCounts[u]++;
           }
         } else {
-          if (goods[i].nutritionFacts[item] === false) {
-            nutritionFactsCounts[j]++;
+          if (goods[q].nutritionFacts[fact] === false) {
+            nutritionFactsCounts[u]++;
           }
         }
-      })
+      });
     });
 
-    propertyInputsContainers.forEach(function (item, i) {
-      item.querySelector('.input-btn__item-count').textContent = '(' + nutritionFactsCounts[i] + ')'
-    })
+    propertyInputsContainers.forEach(function (item, t) {
+      item.querySelector('.input-btn__item-count').textContent = '(' + nutritionFactsCounts[t] + ')';
+    });
 
-    //избранное
+    // избранное
     favoriteInput.parentNode.querySelector('.input-btn__item-count').textContent = '(0)';
 
-    //наличие
-    goods.forEach(function(item) {
+    // наличие
+    goods.forEach(function (item) {
       if (item.amount > 0) {
-        availabilityAmount++
-      };
+        availabilityAmount++;
+      }
     });
 
     availabilityInput.parentNode.querySelector('.input-btn__item-count').textContent = '(' + availabilityAmount + ')';
   };
 
-   var getActivInputsValue = function (inputs, activeInputs) {
-    for (var i = 0; i < inputs.length; i++) {
-      if (inputs[i].checked === true) {
-        activeInputs.push(inputs[i].value);
+  var getActivInputsValue = function (inputs, activeInputs) {
+    for (var z = 0; z < inputs.length; z++) {
+      if (inputs[z].checked === true) {
+        activeInputs.push(inputs[z].value);
       }
-    };
+    }
   };
 
-  var applyFilterToType = function(evt, goods) {
+  var applyFilterToType = function (evt, goods) {
     var activeTypeInputs = [];
     getActivInputsValue(typeFilterInputs, activeTypeInputs);
     if (activeTypeInputs.length === 0) {
       return goods;
     }
 
-    var activeNames = activeTypeInputs.map(function(item) {
-        return filterArea.querySelector('label[for="filter-' + item + '"]').textContent;
-      });
+    var activeNames = activeTypeInputs.map(function (item) {
+      return filterArea.querySelector('label[for="filter-' + item + '"]').textContent;
+    });
 
     var filterArray = [];
-    for (var i = 0; i < activeNames.length; i++) {
+    for (var k = 0; k < activeNames.length; k++) {
       filterArray = filterArray.concat(goods.filter(function (item) {
-        return item.kind === activeNames[i];
+        return item.kind === activeNames[k];
       }));
     }
     return filterArray;
   };
 
-  var applyFilterToProperty = function(evt, goods) {
+  var applyFilterToProperty = function (evt, goods) {
     var activePropInputs = [];
     getActivInputsValue(propertyFilterInputs, activePropInputs);
     if (activePropInputs.length === 0) {
       return goods;
-    };
-
-    console.log(activePropInputs);
+    }
 
     var filterArray = [];
-    for (var i = 0; i < activePropInputs.length; i++) {
-      if (activePropInputs[i] === 'sugar-free') {
+    for (var k = 0; k < activePropInputs.length; k++) {
+      if (activePropInputs[k] === 'sugar-free') {
         filterArray = filterArray.concat(goods.filter(function (item) {
-        return item.nutritionFacts.sugar === false;
+          return item.nutritionFacts.sugar === false;
         }));
-      } else if (activePropInputs[i] === 'vegetarian') {
+      } else if (activePropInputs[k] === 'vegetarian') {
         filterArray = filterArray.concat(goods.filter(function (item) {
-        return item.nutritionFacts.vegetarian === true;
+          return item.nutritionFacts.vegetarian === true;
         }));
-      } else if (activePropInputs[i] === 'gluten-free') {
+      } else if (activePropInputs[k] === 'gluten-free') {
         filterArray = filterArray.concat(goods.filter(function (item) {
-        return item.nutritionFacts.gluten === false;
+          return item.nutritionFacts.gluten === false;
         }));
       }
     }
 
-    return filterArray;
+    return unique(filterArray);
   };
 
   var applyFilterToPrice = function (evt, goods) {
     var rangePriceMin = document.querySelector('.range__price--min').textContent;
     var rangePriceMax = document.querySelector('.range__price--max').textContent;
 
-    filteredGoods = goods.filter(function(item) {
-      return item.price <= rangePriceMax
+    filteredGoods = goods.filter(function (item) {
+      return item.price <= rangePriceMax;
     });
 
-    filteredGoods = filteredGoods.filter(function(item) {
-      return item.price >= rangePriceMin
+    filteredGoods = filteredGoods.filter(function (item) {
+      return item.price >= rangePriceMin;
     });
 
     return filteredGoods;
@@ -154,27 +148,27 @@
 
   var sortFilter = function (evt, goods) {
     if (evt.target.value === 'popular') {
-      filteredGoods = goods.sort(function(a, b) {
+      filteredGoods = goods.sort(function (a, b) {
         return b.rating.number - a.rating.number;
-      })
+      });
     }
 
     if (evt.target.value === 'expensive') {
-      filteredGoods = goods.sort(function(a, b) {
+      filteredGoods = goods.sort(function (a, b) {
         return b.price - a.price;
-      })
+      });
     }
 
     if (evt.target.value === 'cheep') {
-      filteredGoods = goods.sort(function(a, b) {
+      filteredGoods = goods.sort(function (a, b) {
         return a.price - b.price;
-      })
+      });
     }
 
     if (evt.target.value === 'rating') {
-      filteredGoods = goods.sort(function(a, b) {
+      filteredGoods = goods.sort(function (a, b) {
         return b.rating.value - a.rating.value;
-      })
+      });
     }
 
     return filteredGoods;
@@ -192,12 +186,13 @@
 
       var updateGoodsCollection = window.updateGoodsCollection;
       var goods = window.goodsData;
-      var favoriteList = window.favoriteList
+      var favoriteList = window.favoriteList;
 
       filteredGoods = goods;
 
-      for (var i = 0; i < activeFilters.length; i++) {
-        filteredGoods = activeFilters[i](evt, filteredGoods);
+      for (var k = 0; k < activeFilters.length; k++) {
+        filteredGoods = activeFilters[k](evt, filteredGoods);
+        // console.log(filteredGoods);
       }
 
       if (evt.target === favoriteInput) {
@@ -207,25 +202,22 @@
           filteredGoods = [];
         }
         findPriceValue(goods);
-      };
+      }
 
 
       if (evt.target === availabilityInput) {
-        filteredGoods = goods.filter(function(item) {
+        filteredGoods = goods.filter(function (item) {
           return item.amount > 0;
         });
-      };
+      }
 
       if (evt.target === filterSubmitButton) {
-        console.log("клик по показать все");
         evt.preventDefault();
         filteredGoods = goods;
-      };
+      }
 
-      console.log("конечные данные");
-      console.log(filteredGoods);
-
-      updateGoodsCollection(filteredGoods);
+      // console.log(filteredGoods);
+      window.debounce(updateGoodsCollection, filteredGoods);
     }
   });
 
