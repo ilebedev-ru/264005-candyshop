@@ -198,7 +198,11 @@
       var goods = window.goodsData;
       var favoriteList = window.favoriteList;
 
-      filteredGoods = goods;
+      if (favoriteInput.checked && favoriteList) {
+        filteredGoods = favoriteList;
+      } else {
+        filteredGoods = goods;
+      }
 
       for (var k = 0; k < activeFilters.length; k++) {
         filteredGoods = activeFilters[k](evt, filteredGoods);
@@ -241,6 +245,8 @@
     evt.preventDefault();
     findPriceValue(goods);
     resetFilters();
+    favoriteInput.checked = false;
+    availabilityInput.checked = false;
     filteredGoods = goods;
 
     window.debounce(updateGoodsCollection, filteredGoods);
