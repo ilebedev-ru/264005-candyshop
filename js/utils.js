@@ -17,35 +17,6 @@
     DATE_LENGTH: 5
   };
 
-  var getRandomNumber = function (min, max) {
-    var rand = min - 0.5 + Math.random() * (max - min + 1);
-    rand = Math.round(rand);
-    return rand;
-  };
-
-  var getRandomBoolean = function () {
-    return Math.random() >= 0.5;
-  };
-
-  var shuffleArray = function (arr) {
-    var shuffledArr = arr.slice(0);
-    for (var i = shuffledArr.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var temp = shuffledArr[i];
-      shuffledArr[i] = shuffledArr[j];
-      shuffledArr[j] = temp;
-    }
-    return shuffledArr;
-  };
-
-  var getRandomContent = function (arr) {
-    var baseIngrigients = arr.slice(0, 2);
-    var randomQuality = getRandomNumber(2, arr.length - 1);
-    var shuffleArr = shuffleArray(arr.slice(randomQuality, arr.length));
-    var randomContent = baseIngrigients.join(', ') + ', ' + shuffleArr.join(', ');
-    return randomContent;
-  };
-
   var getDataItem = function (evt, clickArea, className, title) {
     var target = evt.target;
 
@@ -90,7 +61,7 @@
         results += +numArr[i];
       }
     }
-    return (results % 10 === 0) ? true : false;
+    return results % 10 === 0;
   };
 
   var unique = function (arr) {
@@ -107,11 +78,7 @@
     ESC_KEYCODE: ESC_KEYCODE,
     starsToClassName: starsToClassName,
     paymentValidateParam: paymentValidateParam,
-    getRandomNumber: getRandomNumber,
-    getRandomBoolean: getRandomBoolean,
-    shuffleArray: shuffleArray,
     findMaxValue: findMaxValue,
-    getRandomContent: getRandomContent,
     getDataItem: getDataItem,
     getArrIndex: getArrIndex,
     checkNumberByLun: checkNumberByLun,

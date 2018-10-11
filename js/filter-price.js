@@ -44,6 +44,19 @@
     rangePriceMax.textContent = Math.round(maxPrice * rangeBtnRight.offsetLeft / rangeFilterWidth);
   };
 
+  // var filterToPrice = function(goods) {
+  //   var filteredGoodsToPrice = [];
+  //   filteredGoodsToPrice = goods.filter(function (item) {
+  //     return item.price <= rangePriceMax.textContent;
+  //   });
+
+  //   filteredGoodsToPrice = filteredGoodsToPrice.filter(function (item) {
+  //     return item.price >= rangePriceMin.textContent;
+  //   });
+
+  //   return filteredGoodsToPrice;
+  // };
+
   var mouseDownHandler = function (evt) {
     evt.preventDefault();
     var startCoordsX = evt.clientX;
@@ -104,8 +117,10 @@
     };
 
     var mouseUpHandler = function () {
+      // console.log("mouseUpHandler");
+      // console.log('сработка в поднятии мышки ' +  filterToPrice(window.goodsData));
       document.removeEventListener('mousemove', mouseMoveHandler);
-      document.removeEventListener('mousemove', mouseUpHandler);
+      document.removeEventListener('mouseup', mouseUpHandler);
     };
 
     document.addEventListener('mousemove', mouseMoveHandler);
@@ -145,6 +160,7 @@
         } else {
           changeValue((newX > rangeBtnLeft.offsetLeft) ? 'right' : 'left');
         }
+        // console.log('сработка в без движения ' + filterToPrice(window.goodsData));
       }
       document.removeEventListener('mouseup', filterUpHandler);
     };

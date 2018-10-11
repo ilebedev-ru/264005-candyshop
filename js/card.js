@@ -24,18 +24,7 @@
 
   disabledBuyForm(true);
 
-  var showOrderedAmount = function (item) {
-    var allCards = goodsCards.querySelectorAll('.card-order');
-    for (var i = 0; i < allCards.length; i++) {
-      if (allCards[i].querySelector('.card-order__title').textContent === item.name) {
-        var activeCard = allCards[i];
-      }
-    }
-
-    activeCard.querySelector('.card-order__count').value = item.orderedAmount;
-  };
-
-  var showOrderedAmountSumm = function () {
+  var showOrderedAmountSum = function () {
     var orderedAmountSumm = 0;
     for (var i = 0; i < goodsInCardCollection.length; i++) {
       orderedAmountSumm += goodsInCardCollection[i].orderedAmount;
@@ -43,12 +32,27 @@
     basketCount.textContent = 'Товаров в корзине: ' + orderedAmountSumm;
   };
 
+  var showOrderedAmount = function (item) {
+    if (item) {
+      var allCards = goodsCards.querySelectorAll('.card-order');
+      var allCardsTitles = goodsCards.querySelectorAll('.card-order__title');
+
+      for (var i = 0; i < allCardsTitles.length; i++) {
+        if (allCardsTitles[i].textContent === item.name) {
+          var activeCard = allCards[i];
+        }
+      }
+      activeCard.querySelector('.card-order__count').value = item.orderedAmount;
+    }
+    showOrderedAmountSum();
+  };
+
   var addNewGoodsInCard = function (goods) {
     goods.orderedAmount = 1;
     goodsInCardCollection.push(goods);
     var goodsInCardElement = createGoodsInCardElement(goods);
     goodsCards.appendChild(goodsInCardElement);
-    showOrderedAmountSumm();
+    showOrderedAmount();
   };
 
   var copyGoodsToCard = function (item, index) {
@@ -68,7 +72,6 @@
           if (goodsInCardCollection[i].orderedAmount < goodsInCardCollection[i].amount) {
             goodsInCardCollection[i].orderedAmount++;
             showOrderedAmount(goodsInCardCollection[i]);
-            showOrderedAmountSumm();
             return;
           }
           return;
@@ -81,7 +84,7 @@
   var deleteGoodsInCard = function (index, elementCollection) {
     goodsInCardCollection.splice(index, 1);
     elementCollection[index].remove();
-    showOrderedAmountSumm();
+    showOrderedAmount();
     if (goodsInCardCollection.length === 0) {
       disabledBuyForm(true);
       goodsCards.classList.add('goods__cards--empty');
@@ -98,7 +101,7 @@
       allGoodsInCardElement[i].remove();
     }
 
-    showOrderedAmountSumm();
+    showOrderedAmount();
     disabledBuyForm(true);
 
     goodsCards.classList.add('goods__cards--empty');
@@ -135,7 +138,6 @@
     if (evt.target.classList.contains('card-order__btn--decrease')) {
       if (activeItemInCard.orderedAmount > 0) {
         activeItemInCard.orderedAmount -= 1;
-        showOrderedAmountSumm();
         showOrderedAmount(activeItemInCard);
 
         if (activeItemInCard.orderedAmount === 0) {
@@ -148,7 +150,6 @@
     if (evt.target.classList.contains('card-order__btn--increase')) {
       if (activeItemInCard.orderedAmount < activeItemInCard.amount) {
         activeItemInCard.orderedAmount++;
-        showOrderedAmountSumm();
         showOrderedAmount(activeItemInCard);
       }
     }

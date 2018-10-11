@@ -192,8 +192,7 @@
     if (evt.target.classList.contains('input-btn__input') ||
         evt.target.classList.contains('range__btn') ||
         evt.target.classList.contains('range__filter') ||
-        evt.target.classList.contains('range__fill-line') ||
-        evt.target.classList.contains('catalog__submit')) {
+        evt.target.classList.contains('range__fill-line')) {
 
       var updateGoodsCollection = window.updateGoodsCollection;
       var goods = window.goodsData;
@@ -201,13 +200,13 @@
 
       filteredGoods = goods;
 
-
       for (var k = 0; k < activeFilters.length; k++) {
         filteredGoods = activeFilters[k](evt, filteredGoods);
       }
 
       if (evt.target === favoriteInput) {
         if (favoriteInput.checked) {
+          availabilityInput.checked = false;
           if (favoriteList) {
             filteredGoods = favoriteList;
           } else {
@@ -218,34 +217,37 @@
         }
         findPriceValue(goods);
         resetFilters();
-      } else {
-        favoriteInput.checked = false;
       }
 
       if (evt.target === availabilityInput) {
         resetFilters();
         findPriceValue(goods);
         if (availabilityInput.checked) {
+          favoriteInput.checked = false;
           filteredGoods = goods.filter(function (item) {
             return item.amount > 0;
           });
         }
-      } else {
-        availabilityInput.checked = false;
-      }
-
-      if (evt.target === filterSubmitButton) {
-        evt.preventDefault();
-        findPriceValue(goods);
-        resetFilters();
-        filteredGoods = goods;
       }
 
       window.debounce(updateGoodsCollection, filteredGoods);
     }
   };
 
+  var clickSubmitBtnHandler = function (evt) {
+    var updateGoodsCollection = window.updateGoodsCollection;
+    var goods = window.goodsData;
+
+    evt.preventDefault();
+    findPriceValue(goods);
+    resetFilters();
+    filteredGoods = goods;
+
+    window.debounce(updateGoodsCollection, filteredGoods);
+  };
+
   filterArea.addEventListener('click', clickFilterHandler);
+  filterSubmitButton.addEventListener('click', clickSubmitBtnHandler);
 
   window.findGoodsNumber = findGoodsNumber;
 })();

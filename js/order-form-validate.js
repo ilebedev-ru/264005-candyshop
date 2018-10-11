@@ -26,7 +26,7 @@
   var deliver = document.querySelector('.deliver');
   var deliverStore = deliver.querySelector('.deliver__store');
   var deliverCourier = deliver.querySelector('.deliver__courier');
-  var deliverСourierInputs = deliver.querySelectorAll('.deliver__address-entry-fields input');
+  var deliverCourierInputs = deliver.querySelectorAll('.deliver__address-entry-fields input');
   var deliverStoreInputs = deliver.querySelectorAll('.deliver__store-list input');
   var deliverStoreImg = deliver.querySelector('.deliver__store-map-img');
 
@@ -80,8 +80,8 @@
         deliverStoreInputs[i].disabled = false;
       }
 
-      for (var j = 0; j < deliverСourierInputs.length; j++) {
-        deliverСourierInputs[j].disabled = true;
+      for (var j = 0; j < deliverCourierInputs.length; j++) {
+        deliverCourierInputs[j].disabled = true;
       }
     }
 
@@ -92,8 +92,8 @@
         deliverStoreInputs[k].disabled = true;
       }
 
-      for (var l = 0; l < deliverСourierInputs.length; l++) {
-        deliverСourierInputs[l].disabled = false;
+      for (var l = 0; l < deliverCourierInputs.length; l++) {
+        deliverCourierInputs[l].disabled = false;
       }
     }
   };
