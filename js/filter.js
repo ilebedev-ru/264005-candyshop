@@ -19,6 +19,7 @@
   var availabilityInput = filterArea.querySelector('#filter-availability');
   var availabilityAmount = 0;
 
+  var sortFilterInputs = filterArea.querySelectorAll('input[name="sort"]');
   var filterSubmitButton = document.querySelector('.catalog__submit');
 
   for (var i = 0; i < typeFilterInputs.length; i++) {
@@ -147,28 +148,32 @@
   };
 
   var sortFilter = function (evt, goods) {
-    if (evt.target.value === 'popular') {
-      filteredGoods = goods.sort(function (a, b) {
-        return b.rating.number - a.rating.number;
-      });
-    }
+    for ( var l = 0; l < sortFilterInputs.length; l++) {
+      if (sortFilterInputs[l].checked) {
+        if(sortFilterInputs[l].value === 'popular') {
+          filteredGoods = goods.sort(function (a, b) {
+            return b.rating.number - a.rating.number;
+          });
+        }
 
-    if (evt.target.value === 'expensive') {
-      filteredGoods = goods.sort(function (a, b) {
-        return b.price - a.price;
-      });
-    }
+        if (sortFilterInputs[l].value === 'expensive') {
+          filteredGoods = goods.sort(function (a, b) {
+            return b.price - a.price;
+          });
+        }
 
-    if (evt.target.value === 'cheep') {
-      filteredGoods = goods.sort(function (a, b) {
-        return a.price - b.price;
-      });
-    }
+        if (sortFilterInputs[l].value === 'cheep') {
+          filteredGoods = goods.sort(function (a, b) {
+            return a.price - b.price;
+          });
+        }
 
-    if (evt.target.value === 'rating') {
-      filteredGoods = goods.sort(function (a, b) {
-        return b.rating.value - a.rating.value;
-      });
+        if (sortFilterInputs[l].value === 'rating') {
+          filteredGoods = goods.sort(function (a, b) {
+            return b.rating.value - a.rating.value;
+          });
+        }
+      }
     }
 
     return filteredGoods;
@@ -176,13 +181,15 @@
 
   var activeFilters = [applyFilterToType, applyFilterToProperty, applyFilterToPrice, sortFilter];
 
-
-  filterArea.addEventListener('click', function (evt) {
+  var clickFilterHandler = function(evt) {
+    console.log("сработка клика");
+    console.log(evt.target);
     if (evt.target.classList.contains('input-btn__input') ||
         evt.target.classList.contains('range__btn') ||
         evt.target.classList.contains('range__filter') ||
         evt.target.classList.contains('range__fill-line') ||
         evt.target.classList.contains('catalog__submit')) {
+      console.log("проход в уловие");
 
       var updateGoodsCollection = window.updateGoodsCollection;
       var goods = window.goodsData;
@@ -216,10 +223,12 @@
         filteredGoods = goods;
       }
 
-      // console.log(filteredGoods);
       window.debounce(updateGoodsCollection, filteredGoods);
     }
-  });
+  }
+
+
+  filterArea.addEventListener('click', clickFilterHandler);
 
   window.findGoodsNumber = findGoodsNumber;
 })();
