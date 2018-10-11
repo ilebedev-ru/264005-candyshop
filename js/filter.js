@@ -198,11 +198,8 @@
       var goods = window.goodsData;
       var favoriteList = window.favoriteList;
 
-      if (favoriteInput.checked && favoriteList) {
-        filteredGoods = favoriteList;
-      } else {
-        filteredGoods = goods;
-      }
+
+      filteredGoods = (favoriteInput.checked && favoriteList) ? favoriteList : goods;
 
       for (var k = 0; k < activeFilters.length; k++) {
         filteredGoods = activeFilters[k](evt, filteredGoods);
@@ -211,11 +208,9 @@
       if (evt.target === favoriteInput) {
         if (favoriteInput.checked) {
           availabilityInput.checked = false;
-          if (favoriteList) {
-            filteredGoods = favoriteList;
-          } else {
-            filteredGoods = [];
-          }
+
+          filteredGoods = (favoriteList) ? favoriteList : [];
+
         } else {
           filteredGoods = goods;
         }
