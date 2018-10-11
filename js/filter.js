@@ -34,14 +34,11 @@
     // тип товара
     typeInputsContainers.forEach(function (item) {
       var typeName = item.querySelector('label').textContent;
-      var k = 0;
-      goods.forEach(function (good) {
-        if (good.kind === typeName) {
-          k++;
-        }
-        return k;
-      });
-      item.querySelector('.input-btn__item-count').textContent = '(' + k + ')';
+      var goodsNum = goods.filter(function (good) {
+        return good.kind === typeName;
+      }).length;
+
+      item.querySelector('.input-btn__item-count').textContent = '(' + goodsNum + ')';
     });
 
     // характеристика товара
@@ -82,6 +79,16 @@
       if (inputs[z].checked === true) {
         activeInputs.push(inputs[z].value);
       }
+    }
+  };
+
+  var resetFilters = function () {
+    for (var k = 0; k < typeFilterInputs.length; k++) {
+      typeFilterInputs[k].checked = false;
+    }
+
+    for (var z = 0; z < propertyFilterInputs.length; z++) {
+      propertyFilterInputs[z].checked = false;
     }
   };
 
@@ -148,9 +155,9 @@
   };
 
   var sortFilter = function (evt, goods) {
-    for ( var l = 0; l < sortFilterInputs.length; l++) {
+    for (var l = 0; l < sortFilterInputs.length; l++) {
       if (sortFilterInputs[l].checked) {
-        if(sortFilterInputs[l].value === 'popular') {
+        if (sortFilterInputs[l].value === 'popular') {
           filteredGoods = goods.sort(function (a, b) {
             return b.rating.number - a.rating.number;
           });
@@ -181,15 +188,12 @@
 
   var activeFilters = [applyFilterToType, applyFilterToProperty, applyFilterToPrice, sortFilter];
 
-  var clickFilterHandler = function(evt) {
-    console.log("сработка клика");
-    console.log(evt.target);
+  var clickFilterHandler = function (evt) {
     if (evt.target.classList.contains('input-btn__input') ||
         evt.target.classList.contains('range__btn') ||
         evt.target.classList.contains('range__filter') ||
         evt.target.classList.contains('range__fill-line') ||
         evt.target.classList.contains('catalog__submit')) {
-      console.log("проход в уловие");
 
       var updateGoodsCollection = window.updateGoodsCollection;
       var goods = window.goodsData;
@@ -197,36 +201,49 @@
 
       filteredGoods = goods;
 
+
       for (var k = 0; k < activeFilters.length; k++) {
         filteredGoods = activeFilters[k](evt, filteredGoods);
-        // console.log(filteredGoods);
       }
 
       if (evt.target === favoriteInput) {
-        if (favoriteList) {
-          filteredGoods = favoriteList;
+        if (favoriteInput.checked) {
+          if (favoriteList) {
+            filteredGoods = favoriteList;
+          } else {
+            filteredGoods = [];
+          }
         } else {
-          filteredGoods = [];
+          filteredGoods = goods;
         }
         findPriceValue(goods);
+        resetFilters();
+      } else {
+        favoriteInput.checked = false;
       }
 
-
       if (evt.target === availabilityInput) {
-        filteredGoods = goods.filter(function (item) {
-          return item.amount > 0;
-        });
+        resetFilters();
+        findPriceValue(goods);
+        if (availabilityInput.checked) {
+          filteredGoods = goods.filter(function (item) {
+            return item.amount > 0;
+          });
+        }
+      } else {
+        availabilityInput.checked = false;
       }
 
       if (evt.target === filterSubmitButton) {
         evt.preventDefault();
+        findPriceValue(goods);
+        resetFilters();
         filteredGoods = goods;
       }
 
       window.debounce(updateGoodsCollection, filteredGoods);
     }
-  }
-
+  };
 
   filterArea.addEventListener('click', clickFilterHandler);
 

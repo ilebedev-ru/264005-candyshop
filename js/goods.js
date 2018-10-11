@@ -63,6 +63,18 @@
     goodsElement.querySelector('.card__characteristic').textContent = item.nutritionFacts.sugar ? 'Содержит сахар' : 'Без сахара';
     goodsElement.querySelector('.card__composition-list').textContent = item.nutritionFacts.contents;
 
+    if (window.favoriteList) {
+      favoriteList = window.favoriteList;
+      var favoriteItem = favoriteList.filter(function (favItem) {
+        return favItem.name === item.name;
+      });
+
+      if (favoriteItem[0]) {
+        var favIndicator = goodsElement.querySelector('.card__btn-favorite');
+        favIndicator.classList.add('card__btn-favorite--selected');
+      }
+    }
+
     return goodsElement;
   };
 
