@@ -29,26 +29,6 @@
     return target;
   };
 
-  var getArrIndex = function (arr, property) {
-    var arrIndex = '';
-    for (var i = 0; i < arr.length; i++) {
-      if (arr[i].name === property) {
-        arrIndex = i;
-      }
-    }
-    return arrIndex;
-  };
-
-  var findMaxValue = function (array) {
-    var max = array[0];
-    for (var i = 1; i < array.length; i++) {
-      if (array[i] > max) {
-        max = array[i];
-      }
-    }
-    return max;
-  };
-
   var checkNumberByLun = function (number) {
     var numArr = number.split('').reverse();
     var results = 0;
@@ -64,24 +44,18 @@
     return results % 10 === 0;
   };
 
-  var unique = function (arr) {
-    var result = [];
-    for (var i = 0, l = arr.length; i < l; i++) {
-      if (result.indexOf(arr[i]) === -1 && arr[i] !== '') {
-        result.push(arr[i]);
-      }
-    }
-    return result;
+  var getUnique = function (arr) {
+    return arr.filter(function (item, index, array) {
+      return array.indexOf(item) === index;
+    });
   };
 
   window.utils = {
     ESC_KEYCODE: ESC_KEYCODE,
     starsToClassName: starsToClassName,
     paymentValidateParam: paymentValidateParam,
-    findMaxValue: findMaxValue,
     getDataItem: getDataItem,
-    getArrIndex: getArrIndex,
     checkNumberByLun: checkNumberByLun,
-    unique: unique
+    getUnique: getUnique
   };
 })();

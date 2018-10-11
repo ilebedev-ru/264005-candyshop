@@ -2,7 +2,7 @@
 
 (function () {
   var findPriceValue = window.findPriceValue;
-  var unique = window.utils.unique;
+  var getUnique = window.utils.getUnique;
 
   var filterArea = document.querySelector('.catalog__sidebar');
   var filteredGoods = [];
@@ -136,7 +136,7 @@
       }
     }
 
-    return unique(filterArray);
+    return getUnique(filterArray);
   };
 
   var applyFilterToPrice = function (evt, goods) {
@@ -194,10 +194,9 @@
         evt.target.classList.contains('range__filter') ||
         evt.target.classList.contains('range__fill-line')) {
 
-      var updateGoodsCollection = window.updateGoodsCollection;
+      var updateGoodsCollection = window.goods.updateGoodsCollection;
       var goods = window.goodsData;
-      var favoriteList = window.favoriteList;
-
+      var favoriteList = window.goods.favoriteList;
 
       filteredGoods = (favoriteInput.checked && favoriteList) ? favoriteList : goods;
 
@@ -206,6 +205,9 @@
       });
 
       if (evt.target === favoriteInput) {
+        findPriceValue(goods);
+        resetFilters();
+
         if (favoriteInput.checked) {
           availabilityInput.checked = false;
 
@@ -214,15 +216,15 @@
         } else {
           filteredGoods = goods;
         }
-        findPriceValue(goods);
-        resetFilters();
       }
 
       if (evt.target === availabilityInput) {
         resetFilters();
         findPriceValue(goods);
+
         if (availabilityInput.checked) {
           favoriteInput.checked = false;
+
           filteredGoods = goods.filter(function (item) {
             return item.amount > 0;
           });
@@ -234,7 +236,7 @@
   };
 
   var clickSubmitBtnHandler = function (evt) {
-    var updateGoodsCollection = window.updateGoodsCollection;
+    var updateGoodsCollection = window.goods.updateGoodsCollection;
     var goods = window.goodsData;
 
     evt.preventDefault();

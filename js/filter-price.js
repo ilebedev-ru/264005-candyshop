@@ -3,8 +3,6 @@
 (function () {
   var PIN_WIDTH = 10;
 
-  var findMaxValue = window.utils.findMaxValue;
-
   var rangeFilter = document.querySelector('.range__filter');
   var rangeFilterWidth = getComputedStyle(rangeFilter).width.slice(0, -2);
   var rangeLine = document.querySelector('.range__fill-line');
@@ -28,7 +26,7 @@
 
     rangeCount.textContent = '(' + data.length + ')';
 
-    return findMaxValue(prices);
+    return Math.max.apply(null, prices);
   };
 
   var findPriceValue = function (data) {
@@ -117,8 +115,6 @@
     };
 
     var mouseUpHandler = function () {
-      // console.log("mouseUpHandler");
-      // console.log('сработка в поднятии мышки ' +  filterToPrice(window.goodsData));
       document.removeEventListener('mousemove', mouseMoveHandler);
       document.removeEventListener('mouseup', mouseUpHandler);
     };
@@ -160,7 +156,6 @@
         } else {
           changeValue((newX > rangeBtnLeft.offsetLeft) ? 'right' : 'left');
         }
-        // console.log('сработка в без движения ' + filterToPrice(window.goodsData));
       }
       document.removeEventListener('mouseup', filterUpHandler);
     };

@@ -3,7 +3,6 @@
 (function () {
   var ESC_KEYCODE = window.utils.ESC_KEYCODE;
   var getDataItem = window.utils.getDataItem;
-  var getArrIndex = window.utils.getArrIndex;
   var copyGoodsToCard = window.cards.copyGoodsToCard;
   var starsToClassName = window.utils.starsToClassName;
   var findPriceValue = window.findPriceValue;
@@ -32,15 +31,13 @@
     }
   };
 
-  var putClassOnElementAmount = function (element, item) {
-    element.classList.remove('card--in-stock');
-
-    if (item > 5) {
-      element.classList.add('card--in-stock');
-    } else if (item <= 5 && item >= 1) {
-      element.classList.add('card--little');
-    } else if (item === 0) {
-      element.classList.add('card--soon');
+  var getClass = function (item) {
+    if (item.amount > 5) {
+      return 'card--in-stock';
+    } else if (item.amount <= 5 && item.amount >= 1) {
+      return 'card--little';
+    } else {
+      return 'card--soon';
     }
   };
 
@@ -55,7 +52,8 @@
       + item.weight
       + ' Г</span>';
 
-    putClassOnElementAmount(goodsElement, item.amount);
+    goodsElement.classList.remove('card--in-stock');
+    goodsElement.classList.add(getClass(item));
 
     goodsElement.querySelector('.stars__rating').classList.remove('stars__rating--five');
     goodsElement.querySelector('.stars__rating').classList.add(starsToClassName[item.rating.value]);
@@ -63,16 +61,8 @@
     goodsElement.querySelector('.card__characteristic').textContent = item.nutritionFacts.sugar ? 'Содержит сахар' : 'Без сахара';
     goodsElement.querySelector('.card__composition-list').textContent = item.nutritionFacts.contents;
 
-    if (window.favoriteList) {
-      favoriteList = window.favoriteList;
-      var favoriteItem = favoriteList.filter(function (favItem) {
-        return favItem.name === item.name;
-      });
-
-      if (favoriteItem[0]) {
-        var favIndicator = goodsElement.querySelector('.card__btn-favorite');
-        favIndicator.classList.add('card__btn-favorite--selected');
-      }
+    if (favoriteList.indexOf(item) !== -1) {
+      goodsElement.querySelector('.card__btn-favorite').classList.add('card__btn-favorite--selected');
     }
 
     return goodsElement;
@@ -104,8 +94,6 @@
     document.addEventListener('keydown', keydownEscModalHandler);
   };
 
-  window.backend.load(createGoodsCollection, showLoadError);
-
   var updateGoodsCollection = function (newGoods) {
     catalogCards.innerHTML = '';
     if (newGoods.length === 0) {
@@ -121,8 +109,13 @@
 
   catalogCards.addEventListener('click', function (evt) {
     var goodsData = window.goodsData;
-    var dataItem = getDataItem(evt, catalogCards, 'catalog__card', '.card__title');
-    var cardsIndex = getArrIndex(goodsData, dataItem);
+    var cardName = getDataItem(evt, catalogCards, 'catalog__card', '.card__title');
+
+    var goodsNames = goodsData.map(function (item) {
+      return item.name;
+    });
+
+    var cardsIndex = goodsNames.indexOf(cardName);
     var activeCard = window.goodsData[cardsIndex];
     var allCardsElement = catalogCards.querySelectorAll('.catalog__card');
 
@@ -131,7 +124,7 @@
       evt.preventDefault();
 
       if (activeCard.amount > 0) {
-        copyGoodsToCard(activeCard, dataItem);
+        copyGoodsToCard(activeCard, cardName);
       }
     }
 
@@ -157,5 +150,10 @@
     }
   });
 
-  window.updateGoodsCollection = updateGoodsCollection;
+  window.backend.load(createGoodsCollection, showLoadError);
+
+  window.goods = {
+    updateGoodsCollection: updateGoodsCollection,
+    favoriteList: favoriteList
+  };
 })();
