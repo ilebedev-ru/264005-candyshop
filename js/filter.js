@@ -201,9 +201,9 @@
 
       filteredGoods = (favoriteInput.checked && favoriteList) ? favoriteList : goods;
 
-      for (var k = 0; k < activeFilters.length; k++) {
-        filteredGoods = activeFilters[k](evt, filteredGoods);
-      }
+      activeFilters.forEach(function (func) {
+        filteredGoods = func(evt, filteredGoods);
+      });
 
       if (evt.target === favoriteInput) {
         if (favoriteInput.checked) {
