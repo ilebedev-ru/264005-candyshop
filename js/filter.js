@@ -8,12 +8,10 @@
   var filteredGoods = [];
 
   var typeFilterInputs = filterArea.querySelectorAll('input[name="food-type"]');
-  var typeInputsContainers = [];
 
   var propertyFilterInputs = filterArea.querySelectorAll('input[name="food-property"]');
   var nutritionFacts = ['sugar', 'vegetarian', 'gluten'];
   var nutritionFactsCounts = [0, 0, 0];
-  var propertyInputsContainers = [];
 
   var favoriteInput = filterArea.querySelector('#filter-favorite');
   var availabilityInput = filterArea.querySelector('#filter-availability');
@@ -22,13 +20,13 @@
   var sortFilterInputs = filterArea.querySelectorAll('input[name="sort"]');
   var filterSubmitButton = document.querySelector('.catalog__submit');
 
-  for (var i = 0; i < typeFilterInputs.length; i++) {
-    typeInputsContainers[i] = typeFilterInputs[i].parentNode;
-  }
+  var typeInputsContainers = Array.prototype.map.call(typeFilterInputs, function (input) {
+    return input.parentNode;
+  });
 
-  for (var j = 0; j < propertyFilterInputs.length; j++) {
-    propertyInputsContainers[j] = propertyFilterInputs[j].parentNode;
-  }
+  var propertyInputsContainers = Array.prototype.map.call(propertyFilterInputs, function (input) {
+    return input.parentNode;
+  });
 
   var findGoodsNumber = function (goods) {
     // тип товара
@@ -42,23 +40,23 @@
     });
 
     // характеристика товара
-    goods.forEach(function (item, q) {
-      nutritionFacts.forEach(function (fact, u) {
+    goods.forEach(function (item, i) {
+      nutritionFacts.forEach(function (fact, j) {
 
         if (fact === 'vegetarian') {
-          if (goods[q].nutritionFacts[fact] === true) {
-            nutritionFactsCounts[u]++;
+          if (goods[i].nutritionFacts[fact] === true) {
+            nutritionFactsCounts[j]++;
           }
         } else {
-          if (goods[q].nutritionFacts[fact] === false) {
-            nutritionFactsCounts[u]++;
+          if (goods[i].nutritionFacts[fact] === false) {
+            nutritionFactsCounts[j]++;
           }
         }
       });
     });
 
-    propertyInputsContainers.forEach(function (item, t) {
-      item.querySelector('.input-btn__item-count').textContent = '(' + nutritionFactsCounts[t] + ')';
+    propertyInputsContainers.forEach(function (item, i) {
+      item.querySelector('.input-btn__item-count').textContent = '(' + nutritionFactsCounts[i] + ')';
     });
 
     // избранное
@@ -75,21 +73,21 @@
   };
 
   var getActivInputsValue = function (inputs, activeInputs) {
-    for (var z = 0; z < inputs.length; z++) {
-      if (inputs[z].checked === true) {
-        activeInputs.push(inputs[z].value);
+    Array.prototype.forEach.call(inputs, function (input) {
+      if (input.checked === true) {
+        activeInputs.push(input.value);
       }
-    }
+    });
   };
 
   var resetFilters = function () {
-    for (var k = 0; k < typeFilterInputs.length; k++) {
-      typeFilterInputs[k].checked = false;
-    }
+    Array.prototype.forEach.call(typeFilterInputs, function (input) {
+      input.checked = false;
+    });
 
-    for (var z = 0; z < propertyFilterInputs.length; z++) {
-      propertyFilterInputs[z].checked = false;
-    }
+    Array.prototype.forEach.call(propertyFilterInputs, function (input) {
+      input.checked = false;
+    });
 
     sortFilterInputs[0].checked = true;
   };
@@ -105,13 +103,13 @@
       return filterArea.querySelector('label[for="filter-' + item + '"]').textContent;
     });
 
-    var filterArray = [];
-    for (var k = 0; k < activeNames.length; k++) {
-      filterArray = filterArray.concat(goods.filter(function (item) {
-        return item.kind === activeNames[k];
+    var filterToTypeArray = [];
+    for (var i = 0; i < activeNames.length; i++) {
+      filterToTypeArray = filterToTypeArray.concat(goods.filter(function (item) {
+        return item.kind === activeNames[i];
       }));
     }
-    return filterArray;
+    return filterToTypeArray;
   };
 
   var applyFilterToProperty = function (evt, goods) {
@@ -157,27 +155,27 @@
   };
 
   var sortFilter = function (evt, goods) {
-    for (var l = 0; l < sortFilterInputs.length; l++) {
-      if (sortFilterInputs[l].checked) {
-        if (sortFilterInputs[l].value === 'popular') {
+    for (var i = 0; i < sortFilterInputs.length; i++) {
+      if (sortFilterInputs[i].checked) {
+        if (sortFilterInputs[i].value === 'popular') {
           filteredGoods = goods.sort(function (a, b) {
             return b.rating.number - a.rating.number;
           });
         }
 
-        if (sortFilterInputs[l].value === 'expensive') {
+        if (sortFilterInputs[i].value === 'expensive') {
           filteredGoods = goods.sort(function (a, b) {
             return b.price - a.price;
           });
         }
 
-        if (sortFilterInputs[l].value === 'cheep') {
+        if (sortFilterInputs[i].value === 'cheep') {
           filteredGoods = goods.sort(function (a, b) {
             return a.price - b.price;
           });
         }
 
-        if (sortFilterInputs[l].value === 'rating') {
+        if (sortFilterInputs[i].value === 'rating') {
           filteredGoods = goods.sort(function (a, b) {
             return b.rating.value - a.rating.value;
           });

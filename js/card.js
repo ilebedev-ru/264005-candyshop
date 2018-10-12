@@ -64,9 +64,9 @@
     var allGoodsInCardElement = goodsCards.querySelectorAll('.card-order');
     goodsInCardCollection.splice(0, goodsInCardCollection.length);
 
-    for (var i = 0; i < allGoodsInCardElement.length; i++) {
-      allGoodsInCardElement[i].remove();
-    }
+    Array.prototype.forEach.call(allGoodsInCardElement, function (goods) {
+      goods.remove();
+    });
 
     showOrderedAmountSum();
     disabledBuyForm(true);
@@ -92,7 +92,6 @@
   var incrementGoodInCard = function (good) {
     if (good.orderedAmount < good.amount) {
       good.orderedAmount++;
-
       showOrderedAmount(good);
     }
   };
@@ -100,7 +99,6 @@
   var decrementGoodInCard = function (good) {
     if (good.orderedAmount > 1) {
       good.orderedAmount -= 1;
-
       showOrderedAmount(good);
     } else {
       deleteGoodInCard(good);
@@ -128,7 +126,6 @@
 
       goodsCards.classList.remove('goods__cards--empty');
       goodsCards.querySelector('.goods__card-empty').classList.add('visually-hidden');
-
       addNewGoodInCard(goodsCardCopy);
 
     } else {
