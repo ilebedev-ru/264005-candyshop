@@ -50,12 +50,22 @@
     });
   };
 
+  var DEBOUNCE_INTERVAL = 500;
+  var lastTimeout;
+  var debounce = function (fun, param) {
+    if (lastTimeout) {
+      window.clearTimeout(lastTimeout);
+    }
+    lastTimeout = window.setTimeout(fun, DEBOUNCE_INTERVAL, param);
+  };
+
   window.utils = {
     ESC_KEYCODE: ESC_KEYCODE,
     starsToClassName: starsToClassName,
     paymentValidateParam: paymentValidateParam,
     getDataItem: getDataItem,
     checkNumberByLun: checkNumberByLun,
-    getUnique: getUnique
+    getUnique: getUnique,
+    debounce: debounce
   };
 })();

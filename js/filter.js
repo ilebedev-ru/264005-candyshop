@@ -90,6 +90,8 @@
     for (var z = 0; z < propertyFilterInputs.length; z++) {
       propertyFilterInputs[z].checked = false;
     }
+
+    sortFilterInputs[0].checked = true;
   };
 
   var applyFilterToType = function (evt, goods) {
@@ -231,7 +233,7 @@
         }
       }
 
-      window.debounce(updateGoodsCollection, filteredGoods);
+      window.utils.debounce(updateGoodsCollection, filteredGoods);
     }
   };
 
@@ -246,7 +248,7 @@
     availabilityInput.checked = false;
     filteredGoods = goods;
 
-    window.debounce(updateGoodsCollection, filteredGoods);
+    window.utils.debounce(updateGoodsCollection, filteredGoods);
   };
 
   filterArea.addEventListener('click', clickFilterHandler);

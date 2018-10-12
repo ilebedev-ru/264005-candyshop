@@ -1,9 +1,10 @@
 'use strict';
 
 (function () {
+  var loadGoods = window.backend.load;
   var ESC_KEYCODE = window.utils.ESC_KEYCODE;
   var getDataItem = window.utils.getDataItem;
-  var copyGoodsToCard = window.cards.copyGoodsToCard;
+  var copyGoodToCard = window.cards.copyGoodToCard;
   var starsToClassName = window.utils.starsToClassName;
   var findPriceValue = window.findPriceValue;
   var findGoodsNumber = window.findGoodsNumber;
@@ -16,7 +17,7 @@
   var errorCloseBtn = modalError.querySelector('.modal__close');
 
   var favoriteInput = document.querySelector('#filter-favorite');
-  var favoriteAmoutValue = favoriteInput.parentNode.querySelector('.input-btn__item-count');
+  var favoriteAmountValue = favoriteInput.parentNode.querySelector('.input-btn__item-count');
 
   var favoriteList = [];
 
@@ -108,6 +109,8 @@
   };
 
   catalogCards.addEventListener('click', function (evt) {
+    evt.preventDefault();
+
     var goodsData = window.goodsData;
     var cardName = getDataItem(evt, catalogCards, 'catalog__card', '.card__title');
 
@@ -121,10 +124,8 @@
 
     // добавление в корзину
     if (evt.target.classList.contains('card__btn')) {
-      evt.preventDefault();
-
       if (activeCard.amount > 0) {
-        copyGoodsToCard(activeCard, cardName);
+        copyGoodToCard(activeCard, cardName);
       }
     }
 
@@ -135,22 +136,22 @@
 
     // добавление в избранное
     if (evt.target.classList.contains('card__btn-favorite')) {
-      evt.preventDefault();
       evt.target.classList.toggle('card__btn-favorite--selected');
 
-      if (favoriteList.indexOf(activeCard) === -1) {
+      var activeIndex = favoriteList.indexOf(activeCard);
+
+      if (activeIndex === -1) {
         favoriteList.push(activeCard);
       } else {
-        var favoriteId = favoriteList.indexOf(activeCard);
+        var favoriteId = activeIndex;
         favoriteList.splice(favoriteId, 1);
       }
 
-      favoriteAmoutValue.textContent = '(' + favoriteList.length + ')';
-      window.favoriteList = favoriteList;
+      favoriteAmountValue.textContent = '(' + favoriteList.length + ')';
     }
   });
 
-  window.backend.load(createGoodsCollection, showLoadError);
+  loadGoods(createGoodsCollection, showLoadError);
 
   window.goods = {
     updateGoodsCollection: updateGoodsCollection,
