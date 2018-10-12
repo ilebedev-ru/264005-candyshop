@@ -2,6 +2,9 @@
 
 (function () {
   var ESC_KEYCODE = 27;
+  var DEBOUNCE_INTERVAL = 500;
+
+  var lastTimeout;
 
   var starsToClassName = {
     1: 'stars__rating--one',
@@ -50,8 +53,6 @@
     });
   };
 
-  var DEBOUNCE_INTERVAL = 500;
-  var lastTimeout;
   var debounce = function (fun, param) {
     if (lastTimeout) {
       window.clearTimeout(lastTimeout);

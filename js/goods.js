@@ -143,8 +143,7 @@
       if (activeIndex === -1) {
         favoriteList.push(activeCard);
       } else {
-        var favoriteId = activeIndex;
-        favoriteList.splice(favoriteId, 1);
+        favoriteList.splice(activeIndex, 1);
       }
 
       favoriteAmountValue.textContent = '(' + favoriteList.length + ')';

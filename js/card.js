@@ -44,10 +44,14 @@
     showOrderedAmountSum();
   };
 
-  var deleteGoodInCard = function (index, elementCollection) {
-    goodsInCardCollection.splice(index, 1);
-    elementCollection[index].remove();
+  var deleteGoodInCard = function (element) {
+    var allGoodsInCardElement = goodsCards.querySelectorAll('.card-order');
+    var elementIndex = goodsInCardCollection.indexOf(element);
+
+    goodsInCardCollection.splice(elementIndex, 1);
+    allGoodsInCardElement[elementIndex].remove();
     showOrderedAmountSum();
+
     if (goodsInCardCollection.length === 0) {
       disabledBuyForm(true);
       goodsCards.classList.add('goods__cards--empty');
@@ -85,37 +89,59 @@
     return goodsInCardElement;
   };
 
+  var incrementGoodInCard = function (good) {
+    if (good.orderedAmount < good.amount) {
+      good.orderedAmount++;
+
+      showOrderedAmount(good);
+      return;
+    }
+  };
+
+  var decrementGoodInCard = function (good) {
+    if (good.orderedAmount > 1) {
+      good.orderedAmount -= 1;
+
+      showOrderedAmount(good);
+    } else {
+      deleteGoodInCard(good);
+    }
+  };
+
   var addNewGoodInCard = function (good) {
     good.orderedAmount = 1;
     goodsInCardCollection.push(good);
+
     var goodsInCardElement = createGoodsInCardElement(good);
+
     goodsCards.appendChild(goodsInCardElement);
     showOrderedAmountSum();
   };
 
-  var copyGoodToCard = function (item, index) {
+  var copyGoodToCard = function (item) {
     var goodsCardCopy = Object.assign({}, item);
-    goodsCardCopy.dataItem = index;
+
     disabledBuyForm(false);
     togglePayment('payment__card');
     toggleDeliver('deliver__store');
 
     if (goodsInCardCollection.length === 0) {
+
       goodsCards.classList.remove('goods__cards--empty');
       goodsCards.querySelector('.goods__card-empty').classList.add('visually-hidden');
+
       addNewGoodInCard(goodsCardCopy);
+
     } else {
-      for (var i = 0; i < goodsInCardCollection.length; i++) {
-        if (goodsInCardCollection[i].dataItem === goodsCardCopy.dataItem) {
-          if (goodsInCardCollection[i].orderedAmount < goodsInCardCollection[i].amount) {
-            goodsInCardCollection[i].orderedAmount++;
-            showOrderedAmount(goodsInCardCollection[i]);
-            return;
-          }
-          return;
-        }
+      var goodInCard = goodsInCardCollection.find(function (cardGood) {
+        return cardGood.name === item.name;
+      });
+
+      if (goodInCard) {
+        incrementGoodInCard(goodInCard);
+      } else {
+        addNewGoodInCard(goodsCardCopy);
       }
-      addNewGoodInCard(goodsCardCopy);
     }
   };
 
@@ -127,34 +153,19 @@
     });
 
     var cardsIndex = cardGoodsNames.indexOf(nameItemInCard);
-
     var activeItemInCard = goodsInCardCollection[cardsIndex];
-    var allGoodsInCardElement = goodsCards.querySelectorAll('.card-order');
 
-    // удаление товара
     if (evt.target.classList.contains('card-order__close')) {
       evt.preventDefault();
-      deleteGoodInCard(cardsIndex, allGoodsInCardElement);
+      deleteGoodInCard(activeItemInCard);
     }
 
-    // уменьшение количества
     if (evt.target.classList.contains('card-order__btn--decrease')) {
-      if (activeItemInCard.orderedAmount > 0) {
-        activeItemInCard.orderedAmount -= 1;
-        showOrderedAmount(activeItemInCard);
-
-        if (activeItemInCard.orderedAmount === 0) {
-          deleteGoodInCard(cardsIndex, allGoodsInCardElement);
-        }
-      }
+      decrementGoodInCard(activeItemInCard);
     }
 
-    // увеличение количества
     if (evt.target.classList.contains('card-order__btn--increase')) {
-      if (activeItemInCard.orderedAmount < activeItemInCard.amount) {
-        activeItemInCard.orderedAmount++;
-        showOrderedAmount(activeItemInCard);
-      }
+      incrementGoodInCard(activeItemInCard);
     }
   });
 
