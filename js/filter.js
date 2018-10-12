@@ -7,17 +7,48 @@
 
   var filterSubmitButton = document.querySelector('.catalog__submit');
 
+  var rangePriceMin = document.querySelector('.range__price--min');
+  var rangePriceMax = document.querySelector('.range__price--max');
+
+  var filterTypeArea = document.querySelector('.catalog__filter.type');
+  var filterPropertyArea = document.querySelector('.catalog__filter.property');
+  var filterPriceArea = document.querySelector('.catalog__filter.range');
+  var filterSortArea = document.querySelector('.catalog__filter.sort');
+  var favoriteInput = document.querySelector('#filter-favorite');
+  var availabilityInput = document.querySelector('#filter-availability');
+
   var filterArea = document.querySelector('.catalog__sidebar');
+
   var typeFilterInputs = filterArea.querySelectorAll('input[name="food-type"]');
-  var favoriteInput = filterArea.querySelector('#filter-favorite');
   var propertyFilterInputs = filterArea.querySelectorAll('input[name="food-property"]');
-  var availabilityInput = filterArea.querySelector('#filter-availability');
   var sortFilterInputs = filterArea.querySelectorAll('input[name="sort"]');
 
   var nutritionFacts = ['sugar', 'vegetarian', 'gluten'];
   var nutritionFactsCounts = [0, 0, 0];
   var availabilityAmount = 0;
-  var filteredGoods = [];
+
+  var valueToKind = {
+    'marshmallows': 'Зефир',
+    'marmalade': 'Мармелад',
+    'icecream': 'Мороженое',
+    'soda': 'Газировка',
+    'gum': 'Жевательная резинка',
+  };
+
+  var valueToFact = {
+    'sugar-free': 'sugar',
+    'vegetarian': 'vegetarian',
+    'gluten-free': 'gluten'
+  };
+
+  var activeFilters = {
+    type: '',
+    property: '',
+    price: '',
+    sort: '',
+    favorite: '',
+    availability: ''
+  };
 
   var typeInputsContainers = Array.prototype.map.call(typeFilterInputs, function (input) {
     return input.parentNode;
@@ -71,15 +102,35 @@
     availabilityInput.parentNode.querySelector('.input-btn__item-count').textContent = '(' + availabilityAmount + ')';
   };
 
-  var getActivInputsValue = function (inputs, activeInputs) {
+  var getActivInputsValue = function (inputs) {
+    var activeInputs = [];
     Array.prototype.forEach.call(inputs, function (input) {
-      if (input.checked === true) {
+      if (input.checked) {
         activeInputs.push(input.value);
       }
     });
+    return activeInputs;
+  };
+
+  var checkedActiveValues = function (name, filterInputs) {
+    var activeInputs = getActivInputsValue(filterInputs);
+
+    if (activeInputs.length === 0) {
+      activeFilters[name] = '';
+      return;
+    }
+
+    activeFilters[name] = [activeInputs];
   };
 
   var resetFilters = function () {
+    var activeFiltersKeys = Object.keys(activeFilters);
+    activeFiltersKeys.forEach(function (keys) {
+      activeFilters[keys] = '';
+    });
+
+    findPriceValue(window.goodsData);
+
     Array.prototype.forEach.call(typeFilterInputs, function (input) {
       input.checked = false;
     });
@@ -89,181 +140,195 @@
     });
 
     sortFilterInputs[0].checked = true;
+    favoriteInput.checked = false;
+    availabilityInput.checked = false;
   };
 
-  var getFilteredByType = function (goods) {
-    var activeTypeInputs = [];
-    getActivInputsValue(typeFilterInputs, activeTypeInputs);
-    if (activeTypeInputs.length === 0) {
-      return goods;
-    }
+  var getFilteredByType = function (goods, values) {
+    var filteredByType = [];
 
-    var activeNames = activeTypeInputs.map(function (item) {
-      return filterArea.querySelector('label[for="filter-' + item + '"]').textContent;
-    });
-
-    var filterToTypeArray = [];
-    for (var i = 0; i < activeNames.length; i++) {
-      filterToTypeArray = filterToTypeArray.concat(goods.filter(function (item) {
-        return item.kind === activeNames[i];
+    values[0].forEach(function (value) {
+      filteredByType = filteredByType.concat(goods.filter(function (good) {
+        return good.kind === valueToKind[value];
       }));
-    }
-    return filterToTypeArray;
-  };
-
-  var getFilteredByProperty = function (goods) {
-    var activePropInputs = [];
-    getActivInputsValue(propertyFilterInputs, activePropInputs);
-    if (activePropInputs.length === 0) {
-      return goods;
-    }
-
-    var filterArray = [];
-    for (var k = 0; k < activePropInputs.length; k++) {
-      if (activePropInputs[k] === 'sugar-free') {
-        filterArray = filterArray.concat(goods.filter(function (item) {
-          return item.nutritionFacts.sugar === false;
-        }));
-      } else if (activePropInputs[k] === 'vegetarian') {
-        filterArray = filterArray.concat(goods.filter(function (item) {
-          return item.nutritionFacts.vegetarian === true;
-        }));
-      } else if (activePropInputs[k] === 'gluten-free') {
-        filterArray = filterArray.concat(goods.filter(function (item) {
-          return item.nutritionFacts.gluten === false;
-        }));
-      }
-    }
-
-    return getUnique(filterArray);
-  };
-
-  var getFilteredByPrice = function (goods) {
-    var rangePriceMin = document.querySelector('.range__price--min').textContent;
-    var rangePriceMax = document.querySelector('.range__price--max').textContent;
-
-    filteredGoods = goods.filter(function (item) {
-      return item.price <= rangePriceMax;
     });
 
-    filteredGoods = filteredGoods.filter(function (item) {
-      return item.price >= rangePriceMin;
+    return filteredByType;
+  };
+
+  var getFilteredByProperty = function (goods, values) {
+    var filteredByProperty = [];
+
+    values[0].forEach(function (value) {
+      if (value === 'vegetarian') {
+        filteredByProperty = filteredByProperty.concat(goods.filter(function (item) {
+          return item.nutritionFacts[valueToFact[value]] === true;
+        }));
+      } else {
+        filteredByProperty = filteredByProperty.concat(goods.filter(function (item) {
+          return item.nutritionFacts[valueToFact[value]] === false;
+        }));
+      }
     });
 
-    return filteredGoods;
+    return getUnique(filteredByProperty);
   };
 
-  var getSorteredGoods = function (goods) {
-    for (var i = 0; i < sortFilterInputs.length; i++) {
-      if (sortFilterInputs[i].checked) {
-        if (sortFilterInputs[i].value === 'popular') {
-          filteredGoods = goods.sort(function (a, b) {
-            return b.rating.number - a.rating.number;
-          });
-        }
+  var getFilteredByPrice = function (goods, values) {
+    var filteredByPrice = [];
 
-        if (sortFilterInputs[i].value === 'expensive') {
-          filteredGoods = goods.sort(function (a, b) {
-            return b.price - a.price;
-          });
-        }
+    filteredByPrice = goods.filter(function (item) {
+      return item.price <= values[1];
+    });
 
-        if (sortFilterInputs[i].value === 'cheep') {
-          filteredGoods = goods.sort(function (a, b) {
-            return a.price - b.price;
-          });
-        }
-
-        if (sortFilterInputs[i].value === 'rating') {
-          filteredGoods = goods.sort(function (a, b) {
-            return b.rating.value - a.rating.value;
-          });
-        }
-      }
-    }
-
-    return filteredGoods;
+    filteredByPrice = filteredByPrice.filter(function (item) {
+      return item.price >= values[0];
+    });
+    return filteredByPrice;
   };
 
-  var activeFilters = [getFilteredByType, getFilteredByProperty, getFilteredByPrice, getSorteredGoods];
+  var showFavoriteGoods = function (goods, value) {
+    if (value) {
 
-  var clickFilterHandler = function (evt) {
-    if (evt.target.classList.contains('input-btn__input') ||
-        evt.target.classList.contains('range__btn') ||
-        evt.target.classList.contains('range__filter') ||
-        evt.target.classList.contains('range__fill-line')) {
-
-      var updateGoodsCollection = window.goods.updateGoodsCollection;
-      var goods = window.goodsData;
       var favoriteList = window.goods.favoriteList;
+      var favoriteGoods = [];
 
-      filteredGoods = (favoriteInput.checked && favoriteList) ? favoriteList : goods;
-
-      activeFilters.forEach(function (func) {
-        filteredGoods = func(filteredGoods);
+      favoriteList.forEach(function (favoriteItem) {
+        favoriteGoods = favoriteGoods.concat(goods.filter(function (good) {
+          return good.name === favoriteItem.name;
+        }));
       });
+      return favoriteGoods;
+    }
+    return goods;
+  };
 
-      if (evt.target === favoriteInput) {
-        findPriceValue(goods);
-        resetFilters();
+  var showАvailabilityGoods = function (goods, value) {
+    if (value) {
+      var availabilityGoods = goods.filter(function (good) {
+        return good.amount > 0;
+      });
+      return availabilityGoods;
+    }
+    return goods;
+  };
 
-        if (favoriteInput.checked) {
-          availabilityInput.checked = false;
+  var getSorteredGoods = function (goods, values) {
+    var sorteredGoods = [];
 
-          filteredGoods = (favoriteList) ? favoriteList : [];
+    values[0].forEach(function (value) {
+      if (value === 'popular') {
+        sorteredGoods = goods.sort(function (a, b) {
+          return b.rating.number - a.rating.number;
+        });
 
-        } else {
-          filteredGoods = goods;
-        }
+      } else if (value === 'expensive') {
+        sorteredGoods = goods.sort(function (a, b) {
+          return b.price - a.price;
+        });
+
+      } else if (value === 'cheep') {
+        sorteredGoods = goods.sort(function (a, b) {
+          return a.price - b.price;
+        });
+
+      } else if (value === 'rating') {
+        sorteredGoods = goods.sort(function (a, b) {
+          return b.rating.value - a.rating.value;
+        });
       }
+    });
+    return sorteredGoods;
+  };
 
-      if (evt.target === availabilityInput) {
-        resetFilters();
-        findPriceValue(goods);
+  var clickFilterTypeHandler = function (evt) {
+    if (evt.target.classList.contains('input-btn__input')) {
+      checkedActiveValues('type', typeFilterInputs);
 
-        if (availabilityInput.checked) {
-          favoriteInput.checked = false;
+      debounce(window.goods.updateGoodsCollection, activeFilters);
+    }
+  };
 
-          filteredGoods = goods.filter(function (item) {
-            return item.amount > 0;
-          });
-        }
-      }
+  var clickFilterPropertyHandler = function (evt) {
+    if (evt.target.classList.contains('input-btn__input')) {
+      checkedActiveValues('property', propertyFilterInputs);
+      debounce(window.goods.updateGoodsCollection, activeFilters);
+    }
+  };
 
-      debounce(updateGoodsCollection, filteredGoods);
+  var mouseUpFilterPriceHandler = function () {
+    var priceMin = parseInt(rangePriceMin.textContent, 10);
+    var priceMax = parseInt(rangePriceMax.textContent, 10);
+
+    activeFilters.price = [priceMin, priceMax];
+
+    debounce(window.goods.updateGoodsCollection, activeFilters);
+
+    document.removeEventListener('mouseup', mouseUpFilterPriceHandler);
+  };
+
+  var mouseDownFilterPriceHandler = function (evt) {
+    if (evt.target.classList.contains('range__btn') ||
+      evt.target.classList.contains('range__filter') ||
+      evt.target.classList.contains('range__fill-line')) {
+
+      document.addEventListener('mouseup', mouseUpFilterPriceHandler);
+    }
+  };
+
+  var clickFavoriteAvailabilityHandler = function (evt) {
+    resetFilters();
+
+    if (evt.target === favoriteInput) {
+      favoriteInput.checked = true;
+      availabilityInput.checked = false;
+      activeFilters.availability = false;
+      activeFilters.favorite = true;
+    }
+
+    if (evt.target === availabilityInput) {
+      availabilityInput.checked = true;
+      favoriteInput.checked = false;
+      activeFilters.availability = false;
+      activeFilters.favorite = false;
+    }
+    debounce(window.goods.updateGoodsCollection, activeFilters);
+  };
+
+  var clickFilterSortHandler = function (evt) {
+    if (evt.target.classList.contains('input-btn__input')) {
+      checkedActiveValues('sort', sortFilterInputs);
+
+      debounce(window.goods.updateGoodsCollection, activeFilters);
     }
   };
 
   var clickSubmitBtnHandler = function (evt) {
-    var updateGoodsCollection = window.goods.updateGoodsCollection;
-    var goods = window.goodsData;
-
     evt.preventDefault();
-    findPriceValue(goods);
-    resetFilters();
-    favoriteInput.checked = false;
-    availabilityInput.checked = false;
-    filteredGoods = goods;
 
-    window.utils.debounce(updateGoodsCollection, filteredGoods);
+    resetFilters();
+    debounce(window.goods.updateGoodsCollection, activeFilters);
   };
 
-  filterArea.addEventListener('click', clickFilterHandler);
+  filterTypeArea.addEventListener('click', clickFilterTypeHandler);
+  filterPropertyArea.addEventListener('click', clickFilterPropertyHandler);
+  filterPriceArea.addEventListener('mousedown', mouseDownFilterPriceHandler);
+  filterSortArea.addEventListener('click', clickFilterSortHandler);
+  favoriteInput.addEventListener('click', clickFavoriteAvailabilityHandler);
+  availabilityInput.addEventListener('click', clickFavoriteAvailabilityHandler);
   filterSubmitButton.addEventListener('click', clickSubmitBtnHandler);
 
-  // эксперименты
+  var filterFunctions = {
+    type: getFilteredByType,
+    property: getFilteredByProperty,
+    price: getFilteredByPrice,
+    favorite: showFavoriteGoods,
+    sort: getSorteredGoods,
+    availability: showАvailabilityGoods
+  };
 
-  // var filterMouseUpHandler = function (evt) {
-  //   console.log("событие mousedown на фильтре");
-  // }
-
-  // var filterMouseDownHandler = function (evt) {
-  //   console.log("событие mousedown на фильтре");
-
-  //   document.addEventListener('mouseup', filterMouseUpHandler)
-  // }
-
-  // filterArea.addEventListener('mousedown', filterMouseDownHandler);
-
-  window.findGoodsNumber = findGoodsNumber;
+  window.filter = {
+    findGoodsNumber: findGoodsNumber,
+    filterFunctions: filterFunctions
+  };
 })();

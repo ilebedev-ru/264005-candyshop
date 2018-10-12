@@ -7,7 +7,7 @@
   var copyGoodToCard = window.cards.copyGoodToCard;
   var starsToClassName = window.utils.starsToClassName;
   var findPriceValue = window.findPriceValue;
-  var findGoodsNumber = window.findGoodsNumber;
+  var findGoodsNumber = window.filter.findGoodsNumber;
 
   var catalogCards = document.querySelector('.catalog__cards');
   var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
@@ -96,13 +96,25 @@
     document.addEventListener('keydown', keydownEscModalHandler);
   };
 
-  var updateGoodsCollection = function (newGoods) {
+  var updateGoodsCollection = function (filters) {
+    var goodsData = window.goodsData;
+    var filterFunctions = window.filter.filterFunctions;
+
     catalogCards.innerHTML = '';
-    if (newGoods.length === 0) {
+
+    var allFiltersKeys = Object.keys(filters);
+    allFiltersKeys.forEach(function (keys) {
+      if (filters[keys]) {
+        goodsData = filterFunctions[keys](goodsData, filters[keys]);
+      }
+    });
+
+    if (goodsData.length === 0) {
       catalogCards.appendChild(emptyFiltersTemplate.cloneNode(true));
-    } else {
-      appendFragment(newGoods);
+      return;
     }
+
+    appendFragment(goodsData);
   };
 
   catalogCards.addEventListener('click', function (evt) {
@@ -119,6 +131,10 @@
     var activeCard = window.goodsData[cardsIndex];
     var allCardsElement = catalogCards.querySelectorAll('.catalog__card');
 
+    var activeElement = Array.prototype.find.call(allCardsElement, function (element) {
+      return element.querySelector('.card__title').textContent === cardName;
+    });
+
     // добавление в корзину
     if (evt.target.classList.contains('card__btn')) {
       if (activeCard.amount > 0) {
@@ -128,7 +144,7 @@
 
     // показать состав
     if (evt.target.classList.contains('card__btn-composition')) {
-      allCardsElement[cardsIndex].querySelector('.card__composition').classList.toggle('card__composition--hidden');
+      activeElement.querySelector('.card__composition').classList.toggle('card__composition--hidden');
     }
 
     // добавление в избранное

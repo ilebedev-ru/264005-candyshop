@@ -43,19 +43,6 @@
     rangePriceMax.textContent = Math.round(maxPrice * rangeBtnRight.offsetLeft / rangeFilterWidth);
   };
 
-  // var filterToPrice = function(goods) {
-  //   var filteredGoodsToPrice = [];
-  //   filteredGoodsToPrice = goods.filter(function (item) {
-  //     return item.price <= rangePriceMax.textContent;
-  //   });
-
-  //   filteredGoodsToPrice = filteredGoodsToPrice.filter(function (item) {
-  //     return item.price >= rangePriceMin.textContent;
-  //   });
-
-  //   return filteredGoodsToPrice;
-  // };
-
   var mouseDownHandler = function (evt) {
     evt.preventDefault();
     var startCoordsX = evt.clientX;
