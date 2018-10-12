@@ -9,15 +9,15 @@
   var modalSuccess = document.querySelector('.modal--success');
   var modalError = document.querySelector('.modal--error');
   var errorCloseBtn = modalError.querySelector('.modal__close');
-  var succesCloseBtn = modalSuccess.querySelector('.modal__close');
+  var successCloseBtn = modalSuccess.querySelector('.modal__close');
 
   var payment = document.querySelector('.payment');
   var paymentCard = payment.querySelector('.payment__card-wrap');
   var paymentCash = payment.querySelector('.payment__cash-wrap');
   var paymentCardInputs = paymentCard.querySelectorAll('input');
 
-  var bankCardSucsessMessadge = payment.querySelector('.payment__card-status');
-  var bankCardErrorMessadge = payment.querySelector('.payment__error-message');
+  var bankCardSuccessMessage = payment.querySelector('.payment__card-status');
+  var bankCardErrorMessage = payment.querySelector('.payment__error-message');
   var emailInput = document.querySelector('#contact-data__email');
   var cardNumberInput = payment.querySelector('#payment__card-number');
   var cvcNumberInput = payment.querySelector('#payment__card-cvc');
@@ -123,12 +123,12 @@
       if (!checkNumberByLun(cardNumberInput.value)) {
         cardNumberInput.style.borderColor = 'red';
         cardNumberInput.setCustomValidity('Неверный номер карты');
-        bankCardErrorMessadge.classList.remove('visually-hidden');
+        bankCardErrorMessage.classList.remove('visually-hidden');
       } else {
         cardNumberInput.style.borderColor = 'green';
         cardNumberInput.setCustomValidity('');
-        bankCardSucsessMessadge.textContent = 'Одобрен';
-        bankCardErrorMessadge.classList.add('visually-hidden');
+        bankCardSuccessMessage.textContent = 'Одобрен';
+        bankCardErrorMessage.classList.add('visually-hidden');
       }
     }
   });
@@ -162,7 +162,7 @@
     form.reset();
     window.cards.clearCard();
 
-    succesCloseBtn.addEventListener('click', clickSuccCloseBtnHandler);
+    successCloseBtn.addEventListener('click', clickSuccCloseBtnHandler);
     document.addEventListener('keydown', keydownEscSuccModalHandler);
   };
 

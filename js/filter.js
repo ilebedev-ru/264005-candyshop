@@ -3,22 +3,21 @@
 (function () {
   var findPriceValue = window.findPriceValue;
   var getUnique = window.utils.getUnique;
+  var debounce = window.utils.debounce;
+
+  var filterSubmitButton = document.querySelector('.catalog__submit');
 
   var filterArea = document.querySelector('.catalog__sidebar');
-  var filteredGoods = [];
-
   var typeFilterInputs = filterArea.querySelectorAll('input[name="food-type"]');
-
+  var favoriteInput = filterArea.querySelector('#filter-favorite');
   var propertyFilterInputs = filterArea.querySelectorAll('input[name="food-property"]');
+  var availabilityInput = filterArea.querySelector('#filter-availability');
+  var sortFilterInputs = filterArea.querySelectorAll('input[name="sort"]');
+
   var nutritionFacts = ['sugar', 'vegetarian', 'gluten'];
   var nutritionFactsCounts = [0, 0, 0];
-
-  var favoriteInput = filterArea.querySelector('#filter-favorite');
-  var availabilityInput = filterArea.querySelector('#filter-availability');
   var availabilityAmount = 0;
-
-  var sortFilterInputs = filterArea.querySelectorAll('input[name="sort"]');
-  var filterSubmitButton = document.querySelector('.catalog__submit');
+  var filteredGoods = [];
 
   var typeInputsContainers = Array.prototype.map.call(typeFilterInputs, function (input) {
     return input.parentNode;
@@ -92,7 +91,7 @@
     sortFilterInputs[0].checked = true;
   };
 
-  var applyFilterToType = function (evt, goods) {
+  var getFilteredByType = function (goods) {
     var activeTypeInputs = [];
     getActivInputsValue(typeFilterInputs, activeTypeInputs);
     if (activeTypeInputs.length === 0) {
@@ -112,7 +111,7 @@
     return filterToTypeArray;
   };
 
-  var applyFilterToProperty = function (evt, goods) {
+  var getFilteredByProperty = function (goods) {
     var activePropInputs = [];
     getActivInputsValue(propertyFilterInputs, activePropInputs);
     if (activePropInputs.length === 0) {
@@ -139,7 +138,7 @@
     return getUnique(filterArray);
   };
 
-  var applyFilterToPrice = function (evt, goods) {
+  var getFilteredByPrice = function (goods) {
     var rangePriceMin = document.querySelector('.range__price--min').textContent;
     var rangePriceMax = document.querySelector('.range__price--max').textContent;
 
@@ -154,7 +153,7 @@
     return filteredGoods;
   };
 
-  var sortFilter = function (evt, goods) {
+  var getSorteredGoods = function (goods) {
     for (var i = 0; i < sortFilterInputs.length; i++) {
       if (sortFilterInputs[i].checked) {
         if (sortFilterInputs[i].value === 'popular') {
@@ -186,7 +185,7 @@
     return filteredGoods;
   };
 
-  var activeFilters = [applyFilterToType, applyFilterToProperty, applyFilterToPrice, sortFilter];
+  var activeFilters = [getFilteredByType, getFilteredByProperty, getFilteredByPrice, getSorteredGoods];
 
   var clickFilterHandler = function (evt) {
     if (evt.target.classList.contains('input-btn__input') ||
@@ -201,7 +200,7 @@
       filteredGoods = (favoriteInput.checked && favoriteList) ? favoriteList : goods;
 
       activeFilters.forEach(function (func) {
-        filteredGoods = func(evt, filteredGoods);
+        filteredGoods = func(filteredGoods);
       });
 
       if (evt.target === favoriteInput) {
@@ -231,7 +230,7 @@
         }
       }
 
-      window.utils.debounce(updateGoodsCollection, filteredGoods);
+      debounce(updateGoodsCollection, filteredGoods);
     }
   };
 
@@ -251,6 +250,20 @@
 
   filterArea.addEventListener('click', clickFilterHandler);
   filterSubmitButton.addEventListener('click', clickSubmitBtnHandler);
+
+  // эксперименты
+
+  // var filterMouseUpHandler = function (evt) {
+  //   console.log("событие mousedown на фильтре");
+  // }
+
+  // var filterMouseDownHandler = function (evt) {
+  //   console.log("событие mousedown на фильтре");
+
+  //   document.addEventListener('mouseup', filterMouseUpHandler)
+  // }
+
+  // filterArea.addEventListener('mousedown', filterMouseDownHandler);
 
   window.findGoodsNumber = findGoodsNumber;
 })();
