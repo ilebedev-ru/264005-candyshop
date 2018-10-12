@@ -4,7 +4,8 @@
   var PIN_WIDTH = 10;
 
   var rangeFilter = document.querySelector('.range__filter');
-  var rangeFilterWidth = getComputedStyle(rangeFilter).width.slice(0, -2);
+  var rangeFilterWidth = parseInt(getComputedStyle(rangeFilter).width, 10);
+
   var rangeLine = document.querySelector('.range__fill-line');
 
   var rangeBtnLeft = document.querySelector('.range__btn--left');
@@ -14,7 +15,7 @@
   var rangePriceMax = document.querySelector('.range__price--max');
   var rangeCount = document.querySelector('.range__count');
 
-  var coordFieldMax = rangeFilter.offsetLeft + +rangeFilterWidth;
+  var coordFieldMax = rangeFilter.offsetLeft + parseInt(rangeFilterWidth, 10);
   var coordFieldMin = rangeFilter.offsetLeft;
 
   var moveFlag = false;

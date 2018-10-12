@@ -52,22 +52,26 @@
     }
   };
 
+  var switchInputs = function (inputs, bool) {
+    Array.prototype.forEach.call(inputs, function (input) {
+      input.disabled = bool;
+    });
+  };
+
   // переключение владки оплаты
   var togglePayment = function (type) {
     if (type === 'payment__card') {
       paymentCard.classList.remove('visually-hidden');
       paymentCash.classList.add('visually-hidden');
-      for (var i = 0; i < paymentCardInputs.length; i++) {
-        paymentCardInputs[i].disabled = false;
-      }
+
+      switchInputs(paymentCardInputs, false);
     }
 
     if (type === 'payment__cash') {
       paymentCard.classList.add('visually-hidden');
       paymentCash.classList.remove('visually-hidden');
-      for (var j = 0; j < paymentCardInputs.length; j++) {
-        paymentCardInputs[j].disabled = true;
-      }
+
+      switchInputs(paymentCardInputs, true);
     }
   };
 
@@ -76,25 +80,17 @@
     if (type === 'deliver__store') {
       deliverStore.classList.remove('visually-hidden');
       deliverCourier.classList.add('visually-hidden');
-      for (var i = 0; i < deliverStoreInputs.length; i++) {
-        deliverStoreInputs[i].disabled = false;
-      }
 
-      for (var j = 0; j < deliverCourierInputs.length; j++) {
-        deliverCourierInputs[j].disabled = true;
-      }
+      switchInputs(deliverStoreInputs, false);
+      switchInputs(deliverCourierInputs, true);
     }
 
     if (type === 'deliver__courier') {
       deliverStore.classList.add('visually-hidden');
       deliverCourier.classList.remove('visually-hidden');
-      for (var k = 0; k < deliverStoreInputs.length; k++) {
-        deliverStoreInputs[k].disabled = true;
-      }
 
-      for (var l = 0; l < deliverCourierInputs.length; l++) {
-        deliverCourierInputs[l].disabled = false;
-      }
+      switchInputs(deliverStoreInputs, true);
+      switchInputs(deliverCourierInputs, false);
     }
   };
 

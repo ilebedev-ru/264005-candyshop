@@ -15,9 +15,9 @@
   var basketCount = document.querySelector('.main-header__basket');
 
   var disabledBuyForm = function (boolean) {
-    for (var i = 0; i < buyFormInputs.length; i++) {
-      buyFormInputs[i].disabled = boolean;
-    }
+    Array.prototype.forEach.call(buyFormInputs, function (input) {
+      input.disabled = boolean;
+    });
     submitButton.disabled = boolean;
   };
 
@@ -94,7 +94,6 @@
       good.orderedAmount++;
 
       showOrderedAmount(good);
-      return;
     }
   };
 

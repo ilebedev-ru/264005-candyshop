@@ -21,6 +21,8 @@
 
   var favoriteList = [];
 
+  catalogCardTemplate.classList.remove('card--in-stock');
+
   var clickErrCloseBtnHandler = function () {
     modalError.classList.add('modal--hidden');
   };
@@ -33,13 +35,12 @@
   };
 
   var getClass = function (item) {
-    if (item.amount > 5) {
+    if (item > 5) {
       return 'card--in-stock';
-    } else if (item.amount <= 5 && item.amount >= 1) {
+    } else if (item <= 5 && item >= 1) {
       return 'card--little';
-    } else {
-      return 'card--soon';
     }
+    return 'card--soon';
   };
 
   var createGoodsElement = function (item) {
@@ -53,8 +54,7 @@
       + item.weight
       + ' Г</span>';
 
-    goodsElement.classList.remove('card--in-stock');
-    goodsElement.classList.add(getClass(item));
+    goodsElement.classList.add(getClass(item.amount));
 
     goodsElement.querySelector('.stars__rating').classList.remove('stars__rating--five');
     goodsElement.querySelector('.stars__rating').classList.add(starsToClassName[item.rating.value]);
@@ -69,17 +69,18 @@
     return goodsElement;
   };
 
+  var appendFragment = function (goods) {
+    var fragment = document.createDocumentFragment();
+    for (var i = 0; i < goods.length; i++) {
+      fragment.appendChild(createGoodsElement(goods[i]));
+    }
+    catalogCards.appendChild(fragment);
+  };
+
   var createGoodsCollection = function (goods) {
     window.goodsData = goods;
-    var fragment = document.createDocumentFragment();
 
-    for (var i = 0; i < goods.length; i++) {
-      var newGoodsElement = createGoodsElement(goods[i]);
-      fragment.appendChild(newGoodsElement);
-    }
-
-    catalogCards.appendChild(fragment);
-
+    appendFragment(goods);
     findPriceValue(goods);
     findGoodsNumber(goods);
 
@@ -100,11 +101,7 @@
     if (newGoods.length === 0) {
       catalogCards.appendChild(emptyFiltersTemplate.cloneNode(true));
     } else {
-      var fragment = document.createDocumentFragment();
-      for (var i = 0; i < newGoods.length; i++) {
-        fragment.appendChild(createGoodsElement(newGoods[i]));
-      }
-      catalogCards.appendChild(fragment);
+      appendFragment(newGoods);
     }
   };
 
