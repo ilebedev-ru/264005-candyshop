@@ -102,10 +102,10 @@
 
     catalogCards.innerHTML = '';
 
-    var allFiltersKeys = Object.keys(filters);
-    allFiltersKeys.forEach(function (keys) {
-      if (filters[keys]) {
-        goodsData = filterFunctions[keys](goodsData, filters[keys]);
+    var allFiltersKeys = Object.keys(filters).reverse();
+    allFiltersKeys.forEach(function (key) {
+      if (filters[key]) {
+        goodsData = filterFunctions[key](goodsData, filters[key]);
       }
     });
 

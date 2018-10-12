@@ -160,7 +160,7 @@
     var filteredByProperty = [];
 
     values.forEach(function (value) {
-      var boolStatus = (value === 'vegetarian') ? true : false;
+      var boolStatus = (value === 'vegetarian');
 
       filteredByProperty = filteredByProperty.concat(goods.filter(function (item) {
         return item.nutritionFacts[valueToFact[value]] === boolStatus;
@@ -268,15 +268,17 @@
     if (evt.target === favoriteInput) {
       favoriteInput.checked = true;
       availabilityInput.checked = false;
-      activeFilters.availability = false;
+      activeFilters.availability = null;
       activeFilters.favorite = true;
+
+
     }
 
     if (evt.target === availabilityInput) {
       availabilityInput.checked = true;
       favoriteInput.checked = false;
-      activeFilters.availability = false;
-      activeFilters.favorite = false;
+      activeFilters.availability = true;
+      activeFilters.favorite = null;
     }
     debounce(window.goods.updateGoodsCollection, activeFilters);
   };
