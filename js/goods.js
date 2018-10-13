@@ -1,284 +1,180 @@
 'use strict';
 
+(function () {
+  var ESC_KEYCODE = window.utils.ESC_KEYCODE;
 
-var GoodsData = {
-  NAMES: [
-    'Чесночные сливки',
-    'Огуречный педант',
-    'Молочная хрюша',
-    'Грибной шейк',
-    'Баклажановое безумие',
-    'Паприколу итальяно',
-    'Нинзя-удар васаби',
-    'Хитрый баклажан',
-    'Горчичный вызов',
-    'Кедровая липучка',
-    'Корманный портвейн',
-    'Чилийский задира',
-    'Беконовый взрыв',
-    'Арахис vs виноград',
-    'Сельдерейная душа',
-    'Початок в бутылке',
-    'Чернющий мистер чеснок',
-    'Раша федераша',
-    'Кислая мина',
-    'Кукурузное утро',
-    'Икорный фуршет',
-    'Новогоднее настроение',
-    'С пивком потянет',
-    'Мисс креветка',
-    'Бесконечный взрыв',
-    'Невинные винные',
-    'Бельгийское пенное',
-    'Острый язычок'
-  ],
+  var loadGoods = window.backend.load;
+  var copyGoodToCard = window.cards.copyGoodToCard;
+  var starsToClassName = window.utils.starsToClassName;
+  var findPriceValue = window.findPriceValue;
+  var findGoodsNumber = window.filter.findGoodsNumber;
 
-  PICTURES: [
-    'img/cards/ice-garlic.jpg',
-    'img/cards/ice-cucumber.jpg',
-    'img/cards/ice-pig.jpg',
-    'img/cards/ice-mushroom.jpg',
-    'img/cards/ice-eggplant.jpg',
-    'img/cards/ice-italian.jpg',
-    'img/cards/gum-wasabi.jpg',
-    'img/cards/gum-eggplant.jpg',
-    'img/cards/gum-mustard.jpg',
-    'img/cards/gum-cedar.jpg',
-    'img/cards/gum-portwine.jpg',
-    'img/cards/gum-chile.jpg',
-    'img/cards/soda-bacon.jpg',
-    'img/cards/soda-peanut-grapes.jpg',
-    'img/cards/soda-celery.jpg',
-    'img/cards/soda-cob.jpg',
-    'img/cards/soda-garlic.jpg',
-    'img/cards/soda-russian.jpg',
-    'img/cards/marmalade-sour.jpg',
-    'img/cards/marmalade-corn.jpg',
-    'img/cards/marmalade-caviar.jpg',
-    'img/cards/marmalade-new-year.jpg',
-    'img/cards/marmalade-beer.jpg',
-    'img/cards/marshmallow-shrimp.jpg',
-    'img/cards/marshmallow-bacon.jpg',
-    'img/cards/marshmallow-wine.jpg',
-    'img/cards/marshmallow-beer.jpg',
-    'img/cards/marshmallow-spicy.jpg'
-  ],
+  var catalogCards = document.querySelector('.catalog__cards');
+  var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
+  var emptyFiltersTemplate = document.querySelector('#empty-filters').content.querySelector('.catalog__empty-filter');
 
-  AMOUNTS: {
-    min: 0,
-    max: 20
-  },
+  var modalError = document.querySelector('.modal--error');
+  var errorCloseBtn = modalError.querySelector('.modal__close');
 
-  PRICES: {
-    min: 100,
-    max: 1500
-  },
+  var favoriteInput = document.querySelector('#filter-favorite');
+  var favoriteAmountValue = favoriteInput.parentNode.querySelector('.input-btn__item-count');
 
-  WEIGHTS: {
-    min: 30,
-    max: 300
-  },
+  var favoriteGoods = [];
 
-  RATING_VALUES: {
-    min: 1,
-    max: 5
-  },
+  catalogCardTemplate.classList.remove('card--in-stock');
 
-  RATING_NUMBERS: {
-    min: 10,
-    max: 900
-  },
+  var clickErrCloseBtnHandler = function () {
+    modalError.classList.add('modal--hidden');
+  };
 
-  NUTRITION_FACTS_ENERGYS: {
-    min: 70,
-    max: 500
-  },
-
-  NUTRITION_FACTS_CONTENT: [
-    'молоко',
-    'сливки',
-    'вода',
-    'пищевой краситель',
-    'патока',
-    'ароматизатор бекона',
-    'ароматизатор свинца',
-    'ароматизатор дуба, идентичный натуральному',
-    'ароматизатор картофеля',
-    'лимонная кислота',
-    'загуститель',
-    'эмульгатор',
-    'консервант: сорбат калия',
-    'посолочная смесь: соль, нитрит натрия',
-    'ксилит',
-    'карбамид',
-    'вилларибо',
-    'виллабаджо',
-  ],
-
-  NUMBER: 26,
-  NUMBER_IN_CARD: 3
-};
-
-var ratingStars = {
-  1: 'stars__rating--one',
-  2: 'stars__rating--two',
-  3: 'stars__rating--three',
-  4: 'stars__rating--four',
-  5: 'stars__rating--five'
-};
-
-
-var getRandomNumber = function (min, max) {
-  var rand = min - 0.5 + Math.random() * (max - min + 1);
-  rand = Math.round(rand);
-  return rand;
-};
-
-var getRandomBoolean = function () {
-  return Math.random() >= 0.5;
-};
-
-var shuffleArray = function (arr) {
-  var shuffledArr = arr.slice(0);
-  for (var i = shuffledArr.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var temp = shuffledArr[i];
-    shuffledArr[i] = shuffledArr[j];
-    shuffledArr[j] = temp;
-  }
-  return shuffledArr;
-};
-
-var getRandomContent = function (arr) {
-  var randomContent = '';
-  var shuffleArr = shuffleArray(arr.slice(2, arr.length - 1));
-  shuffleArr.splice(0, 0, arr[0], arr[1]);
-
-  var stringQuantity = getRandomNumber(1, shuffleArr.length);
-  for (var i = 0; i < stringQuantity; i++) {
-    randomContent += (shuffleArr[i] + ', ');
-  }
-  randomContent.substring(0, randomContent.length - 2);
-  return randomContent;
-};
-
-var createGoodsItem = function (goodsData, i) {
-  var goodsItem = {
-    name: shuffleArray(goodsData.NAMES)[i],
-    picture: goodsData.PICTURES[getRandomNumber(0, goodsData.PICTURES.length - 1)],
-    amount: getRandomNumber(goodsData.AMOUNTS.min, goodsData.AMOUNTS.max),
-    price: getRandomNumber(goodsData.PRICES.min, goodsData.PRICES.max),
-    weight: getRandomNumber(goodsData.WEIGHTS.min, goodsData.WEIGHTS.max),
-    Rating: {
-      value: getRandomNumber(goodsData.RATING_VALUES.min, goodsData.RATING_VALUES.max),
-      number: getRandomNumber(goodsData.RATING_NUMBERS.min, goodsData.RATING_NUMBERS.max)
-    },
-    NutritionFact: {
-      sugar: getRandomBoolean(),
-      energy: getRandomNumber(goodsData.NUTRITION_FACTS_ENERGYS.min, goodsData.NUTRITION_FACTS_ENERGYS.max),
-      contents: getRandomContent(goodsData.NUTRITION_FACTS_CONTENT)
+  var keydownEscModalHandler = function (evt) {
+    if (evt.keyCode === ESC_KEYCODE) {
+      clickErrCloseBtnHandler();
+      document.removeEventListener('keydown', keydownEscModalHandler);
     }
   };
 
-  return goodsItem;
-};
+  var getClass = function (item) {
+    if (item > 5) {
+      return 'card--in-stock';
+    } else if (item <= 5 && item >= 1) {
+      return 'card--little';
+    }
+    return 'card--soon';
+  };
 
-var createGoodsCollection = function (goodsData, num) {
-  var collection = [];
+  var createGoodsElement = function (item) {
+    var goodsElement = catalogCardTemplate.cloneNode(true);
 
-  for (var i = 0; i < num; i++) {
-    collection[i] = createGoodsItem(goodsData, i);
-  }
-  return collection;
-};
+    goodsElement.querySelector('.card__title').textContent = item.name;
+    goodsElement.querySelector('.card__img').src = 'img/cards/' + item.picture;
+    goodsElement.querySelector('.card__img').alt = item.name;
+    goodsElement.querySelector('.card__price').innerHTML = item.price
+      + ' <span class="card__currency">₽</span><span class="card__weight">'
+      + item.weight
+      + ' Г</span>';
 
-var catalogCardTemplate = document.querySelector('#card').content.querySelector('.catalog__card');
+    goodsElement.classList.add(getClass(item.amount));
 
-var putClassOnElementAmount = function (element, item) {
-  element.classList.remove('card--in-stock');
+    goodsElement.querySelector('.stars__rating').classList.remove('stars__rating--five');
+    goodsElement.querySelector('.stars__rating').classList.add(starsToClassName[item.rating.value]);
+    goodsElement.querySelector('.star__count').textContent = item.rating.number;
+    goodsElement.querySelector('.card__characteristic').textContent = item.nutritionFacts.sugar ? 'Содержит сахар' : 'Без сахара';
+    goodsElement.querySelector('.card__composition-list').textContent = item.nutritionFacts.contents;
 
-  if (item > 5) {
-    element.classList.add('card--in-stock');
-  } else if (item <= 5 && item >= 1) {
-    element.classList.add('card--little');
-  } else if (item === 0) {
-    element.classList.add('card--soon');
-  }
-};
+    if (favoriteGoods.indexOf(item) !== -1) {
+      goodsElement.querySelector('.card__btn-favorite').classList.add('card__btn-favorite--selected');
+    }
 
-var createGoodsElement = function (item) {
-  var goodsElement = catalogCardTemplate.cloneNode(true);
+    return goodsElement;
+  };
 
-  goodsElement.querySelector('.card__title').textContent = item.name;
-  goodsElement.querySelector('.card__img').src = item.picture;
-  goodsElement.querySelector('.card__img').alt = item.name;
-  goodsElement.querySelector('.card__price').innerHTML = item.price
-    + ' <span class="card__currency">₽</span><span class="card__weight">'
-    + item.weight
-    + ' Г</span>';
+  var appendFragment = function (goods) {
+    var fragment = document.createDocumentFragment();
 
-  putClassOnElementAmount(goodsElement, item.amount);
+    goods.forEach(function (goodsItem) {
+      fragment.appendChild(createGoodsElement(goodsItem));
+    });
 
-  goodsElement.querySelector('.stars__rating').classList.remove('stars__rating--five');
-  goodsElement.querySelector('.stars__rating').classList.add(ratingStars[item.Rating.value]);
-  goodsElement.querySelector('.star__count').textContent = item.Rating.number;
-  goodsElement.querySelector('.card__characteristic').textContent = item.NutritionFact.sugar ? 'Содержит сахар' : 'Без сахара';
-  goodsElement.querySelector('.card__composition-list').textContent = item.NutritionFact.contents;
+    catalogCards.appendChild(fragment);
+  };
 
-  return goodsElement;
-};
+  var createGoodsCollection = function (goods) {
+    window.goods.data = goods;
 
-var createGoodsFragment = function (items) {
-  var fragment = document.createDocumentFragment();
-  for (var i = 0; i < items.length; i++) {
-    fragment.appendChild(createGoodsElement(items[i]));
-  }
-  return fragment;
-};
+    appendFragment(goods);
+    findPriceValue(goods);
+    findGoodsNumber(goods);
 
-var showGoods = function () {
-  var catalogCards = document.querySelector('.catalog__cards');
+    catalogCards.classList.remove('catalog__cards--load');
+    catalogCards.querySelector('.catalog__load').classList.add('visually-hidden');
+  };
 
-  var goodsItems = createGoodsCollection(GoodsData, GoodsData.NUMBER);
-  catalogCards.appendChild(createGoodsFragment(goodsItems));
+  var showLoadError = function (errorMessage) {
+    modalError.classList.remove('modal--hidden');
+    modalError.querySelector('.modal__message').textContent = errorMessage;
 
-  catalogCards.classList.remove('catalog__cards--load');
-  catalogCards.querySelector('.catalog__load').classList.add('visually-hidden');
-};
+    errorCloseBtn.addEventListener('click', clickErrCloseBtnHandler);
+    document.addEventListener('keydown', keydownEscModalHandler);
+  };
 
-showGoods();
+  var updateGoodsCollection = function (filters) {
+    var goodsData = window.goods.data;
+    var filterFunctions = window.filter.functions;
 
-// CARD
+    catalogCards.innerHTML = '';
 
-var goodsCardTemplate = document.querySelector('#card-order').content.querySelector('.goods_card');
+    var allFiltersKeys = Object.keys(filters).reverse();
+    allFiltersKeys.forEach(function (key) {
+      if (filters[key]) {
+        goodsData = filterFunctions[key](goodsData, filters[key]);
+      }
+    });
 
-var createGoodsInCardElement = function (item) {
-  var goodsInCardElement = goodsCardTemplate.cloneNode(true);
+    if (!goodsData.length) {
+      catalogCards.appendChild(emptyFiltersTemplate.cloneNode(true));
+      return;
+    }
 
-  goodsInCardElement.querySelector('.card-order__title').textContent = item.name;
-  goodsInCardElement.querySelector('.card-order__img').src = item.picture;
-  goodsInCardElement.querySelector('.card-order__img').alt = item.name;
-  goodsInCardElement.querySelector('.card-order__price').textContent = item.price + ' ₽';
+    appendFragment(goodsData);
+  };
 
-  return goodsInCardElement;
-};
+  var addToFavorite = function (evt, card) {
+    evt.target.classList.toggle('card__btn-favorite--selected');
 
-var createGoodsInCardFragment = function (items) {
-  var fragment = document.createDocumentFragment();
-  for (var i = 0; i < items.length; i++) {
-    fragment.appendChild(createGoodsInCardElement(items[i]));
-  }
-  return fragment;
-};
+    var activeIndex = favoriteGoods.indexOf(card);
 
-var showGoodsInCard = function () {
-  var goodsCards = document.querySelector('.goods__cards');
+    if (activeIndex === -1) {
+      favoriteGoods.push(card);
+    } else {
+      favoriteGoods.splice(activeIndex, 1);
+    }
 
-  var goodsItemsInCard = createGoodsCollection(GoodsData, GoodsData.NUMBER_IN_CARD);
-  goodsCards.appendChild(createGoodsInCardFragment(goodsItemsInCard));
+    favoriteAmountValue.textContent = '(' + favoriteGoods.length + ')';
+  };
 
-  goodsCards.classList.remove('goods__cards--empty');
-  goodsCards.querySelector('.goods__card-empty').classList.add('visually-hidden');
-};
+  var showComposition = function (elements, name) {
+    var activeElement = Array.prototype.find.call(elements, function (element) {
+      return element.querySelector('.card__title').textContent === name;
+    });
 
-showGoodsInCard();
+    activeElement.querySelector('.card__composition').classList.toggle('card__composition--hidden');
+  };
+
+  catalogCards.addEventListener('click', function (evt) {
+    evt.preventDefault();
+
+    var goodsData = window.goods.data;
+    var cardName = evt.target.closest('.catalog__card').querySelector('.card__title').textContent;
+
+    var goodsNames = goodsData.map(function (item) {
+      return item.name;
+    });
+
+    var cardsIndex = goodsNames.indexOf(cardName);
+    var activeCard = window.goods.data[cardsIndex];
+    var allCardsElement = catalogCards.querySelectorAll('.catalog__card');
+
+    if (evt.target.classList.contains('card__btn')) {
+      if (activeCard.amount > 0) {
+        copyGoodToCard(activeCard, cardName);
+      }
+    }
+
+    if (evt.target.classList.contains('card__btn-composition')) {
+      showComposition(allCardsElement, cardName);
+    }
+
+    if (evt.target.classList.contains('card__btn-favorite')) {
+      addToFavorite(evt, activeCard);
+    }
+  });
+
+  loadGoods(createGoodsCollection, showLoadError);
+
+  window.goods = {
+    data: null,
+    updateCollection: updateGoodsCollection,
+    favorite: favoriteGoods
+  };
+})();
