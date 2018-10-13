@@ -58,27 +58,28 @@
     return input.parentNode;
   });
 
-  var findGoodsNumber = function (goods) {
-    // тип товара
+  var findNumberByType = function (goods) {
     typeInputsContainers.forEach(function (item) {
       var typeName = item.querySelector('label').textContent;
+
       var goodsNum = goods.filter(function (good) {
         return good.kind === typeName;
       }).length;
 
       item.querySelector('.input-btn__item-count').textContent = '(' + goodsNum + ')';
     });
+  };
 
-    // характеристика товара
+  var findNumberByProperty = function (goods) {
     goods.forEach(function (item, i) {
       nutritionFacts.forEach(function (fact, j) {
 
         if (fact === 'vegetarian') {
-          if (goods[i].nutritionFacts[fact] === true) {
+          if (goods[i].nutritionFacts[fact]) {
             nutritionFactsCounts[j]++;
           }
         } else {
-          if (goods[i].nutritionFacts[fact] === false) {
+          if (!goods[i].nutritionFacts[fact]) {
             nutritionFactsCounts[j]++;
           }
         }
@@ -88,11 +89,14 @@
     propertyInputsContainers.forEach(function (item, i) {
       item.querySelector('.input-btn__item-count').textContent = '(' + nutritionFactsCounts[i] + ')';
     });
+  };
 
-    // избранное
+  var findGoodsNumber = function (goods) {
+    findNumberByType(goods);
+    findNumberByProperty(goods);
+
     favoriteInput.parentNode.querySelector('.input-btn__item-count').textContent = '(0)';
 
-    // наличие
     goods.forEach(function (item) {
       if (item.amount > 0) {
         availabilityAmount++;
@@ -114,13 +118,7 @@
 
   var checkedActiveValues = function (name, filterInputs) {
     var activeInputs = getActiveInputsValue(filterInputs);
-
-    if (activeInputs.length === 0) {
-      activeFilters[name] = null;
-      return;
-    }
-
-    activeFilters[name] = activeInputs;
+    activeFilters[name] = (!activeInputs.length) ? null : activeInputs;
   };
 
   var resetFilters = function () {
@@ -129,7 +127,7 @@
       activeFilters[keys] = null;
     });
 
-    findPriceValue(window.goodsData);
+    findPriceValue(window.goods.data);
 
     Array.prototype.forEach.call(typeFilterInputs, function (input) {
       input.checked = false;
@@ -145,29 +143,29 @@
   };
 
   var getFilteredByType = function (goods, values) {
-    var filteredByType = [];
+    var filteredByTypeGoods = [];
 
     values.forEach(function (value) {
-      filteredByType = filteredByType.concat(goods.filter(function (good) {
+      filteredByTypeGoods = filteredByTypeGoods.concat(goods.filter(function (good) {
         return good.kind === valueToKind[value];
       }));
     });
 
-    return filteredByType;
+    return filteredByTypeGoods;
   };
 
   var getFilteredByProperty = function (goods, values) {
-    var filteredByProperty = [];
+    var filteredByPropertyGoods = [];
 
     values.forEach(function (value) {
       var boolStatus = (value === 'vegetarian');
 
-      filteredByProperty = filteredByProperty.concat(goods.filter(function (item) {
+      filteredByPropertyGoods = filteredByPropertyGoods.concat(goods.filter(function (item) {
         return item.nutritionFacts[valueToFact[value]] === boolStatus;
       }));
     });
 
-    return getUnique(filteredByProperty);
+    return getUnique(filteredByPropertyGoods);
   };
 
   var getFilteredByPrice = function (goods, values) {
@@ -179,15 +177,15 @@
   var showFavoriteGoods = function (goods, value) {
     if (value) {
 
-      var favoriteList = window.goods.favoriteList;
-      var favoriteGoods = [];
+      var favoriteGoods = window.goods.favorite;
+      var filteredByfavoriteGoods = [];
 
-      favoriteList.forEach(function (favoriteItem) {
-        favoriteGoods = favoriteGoods.concat(goods.filter(function (good) {
+      favoriteGoods.forEach(function (favoriteItem) {
+        filteredByfavoriteGoods = filteredByfavoriteGoods.concat(goods.filter(function (good) {
           return good.name === favoriteItem.name;
         }));
       });
-      return favoriteGoods;
+      return filteredByfavoriteGoods;
     }
     return goods;
   };
@@ -228,14 +226,14 @@
     if (evt.target.classList.contains('input-btn__input')) {
       checkedActiveValues('type', typeFilterInputs);
 
-      debounce(window.goods.updateGoodsCollection, activeFilters);
+      debounce(window.goods.updateCollection, activeFilters);
     }
   };
 
   var clickFilterPropertyHandler = function (evt) {
     if (evt.target.classList.contains('input-btn__input')) {
       checkedActiveValues('property', propertyFilterInputs);
-      debounce(window.goods.updateGoodsCollection, activeFilters);
+      debounce(window.goods.updateCollection, activeFilters);
     }
   };
 
@@ -248,7 +246,7 @@
       max: priceMax
     };
 
-    debounce(window.goods.updateGoodsCollection, activeFilters);
+    debounce(window.goods.updateCollection, activeFilters);
 
     document.removeEventListener('mouseup', mouseUpFilterPriceHandler);
   };
@@ -280,14 +278,14 @@
       activeFilters.availability = true;
       activeFilters.favorite = null;
     }
-    debounce(window.goods.updateGoodsCollection, activeFilters);
+    debounce(window.goods.updateCollection, activeFilters);
   };
 
   var clickFilterSortHandler = function (evt) {
     if (evt.target.classList.contains('input-btn__input')) {
       checkedActiveValues('sort', sortFilterInputs);
 
-      debounce(window.goods.updateGoodsCollection, activeFilters);
+      debounce(window.goods.updateCollection, activeFilters);
     }
   };
 
@@ -295,7 +293,7 @@
     evt.preventDefault();
 
     resetFilters();
-    debounce(window.goods.updateGoodsCollection, activeFilters);
+    debounce(window.goods.updateCollection, activeFilters);
   };
 
   filterTypeArea.addEventListener('click', clickFilterTypeHandler);
@@ -317,6 +315,6 @@
 
   window.filter = {
     findGoodsNumber: findGoodsNumber,
-    filterFunctions: filterFunctions
+    functions: filterFunctions
   };
 })();

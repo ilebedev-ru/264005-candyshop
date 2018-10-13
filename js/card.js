@@ -1,7 +1,6 @@
 'use strict';
 
 (function () {
-  var getDataItem = window.utils.getDataItem;
   var togglePayment = window.orderFormValidate.togglePayment;
   var toggleDeliver = window.orderFormValidate.toggleDeliver;
 
@@ -9,26 +8,51 @@
   var buyFormInputs = buyForm.querySelectorAll('input');
   var submitButton = buyForm.querySelector('.buy__submit-btn');
 
-  var goodsInCardCollection = [];
   var goodsCardTemplate = document.querySelector('#card-order').content.querySelector('.goods_card');
   var goodsCards = document.querySelector('.goods__cards');
   var basketCount = document.querySelector('.main-header__basket');
+  var goodsCardsEmptyMessage = goodsCards.querySelector('.goods__card-empty');
 
-  var disabledBuyForm = function (boolean) {
+  var goodsCardsTotal = document.querySelector('.goods__total');
+  var goodsCardsOrgerLink = goodsCardsTotal.querySelector('.goods__order-link');
+  var goodsCardsCount = goodsCardsTotal.querySelector('.goods__total-count');
+
+  var inCardCollectionGoods = [];
+
+  var switchEmptyCartState = function (boolean) {
+    if (boolean) {
+      goodsCards.classList.add('goods__cards--empty');
+      goodsCardsEmptyMessage.classList.remove('visually-hidden');
+      goodsCardsTotal.classList.add('visually-hidden');
+      goodsCardsOrgerLink.classList.add('goods__order-link--disabled');
+    } else {
+      goodsCards.classList.remove('goods__cards--empty');
+      goodsCardsEmptyMessage.classList.add('visually-hidden');
+      goodsCardsTotal.classList.remove('visually-hidden');
+      goodsCardsOrgerLink.classList.remove('goods__order-link--disabled');
+    }
+  };
+
+  var disableBuyForm = function (boolean) {
     Array.prototype.forEach.call(buyFormInputs, function (input) {
       input.disabled = boolean;
     });
     submitButton.disabled = boolean;
   };
 
-  disabledBuyForm(true);
+  disableBuyForm(true);
 
   var showOrderedAmountSum = function () {
     var orderedAmountSumm = 0;
-    for (var i = 0; i < goodsInCardCollection.length; i++) {
-      orderedAmountSumm += goodsInCardCollection[i].orderedAmount;
-    }
-    basketCount.textContent = 'Товаров в корзине: ' + orderedAmountSumm;
+    var orderedPriceSumm = 0;
+
+    Array.prototype.forEach.call(inCardCollectionGoods, function (card) {
+      orderedAmountSumm += card.orderedAmount;
+      orderedPriceSumm += card.price * card.orderedAmount;
+    });
+
+    basketCount.textContent = 'Товаров в корзине: ' + orderedAmountSumm + ' на сумму ' + orderedPriceSumm + '₽';
+    goodsCardsCount.textContent = 'Итого товаров: ' + orderedAmountSumm + ' на сумму ' + orderedPriceSumm + ' ₽';
   };
 
   var showOrderedAmount = function (item) {
@@ -45,34 +69,34 @@
   };
 
   var deleteGoodInCard = function (element) {
-    var allGoodsInCardElement = goodsCards.querySelectorAll('.card-order');
-    var elementIndex = goodsInCardCollection.indexOf(element);
+    var inCardAllGoods = goodsCards.querySelectorAll('.card-order');
+    var elementIndex = inCardCollectionGoods.indexOf(element);
 
-    goodsInCardCollection.splice(elementIndex, 1);
-    allGoodsInCardElement[elementIndex].remove();
+    inCardCollectionGoods.splice(elementIndex, 1);
+    inCardAllGoods[elementIndex].remove();
     showOrderedAmountSum();
 
-    if (goodsInCardCollection.length === 0) {
-      disabledBuyForm(true);
-      goodsCards.classList.add('goods__cards--empty');
-      goodsCards.querySelector('.goods__card-empty').classList.remove('visually-hidden');
+    if (!inCardCollectionGoods.length) {
+
+      disableBuyForm(true);
+      switchEmptyCartState(true);
+
       basketCount.textContent = 'В корзине ничего нет';
     }
   };
 
   var clearCard = function () {
-    var allGoodsInCardElement = goodsCards.querySelectorAll('.card-order');
-    goodsInCardCollection.splice(0, goodsInCardCollection.length);
+    var inCardAllGoods = goodsCards.querySelectorAll('.card-order');
+    inCardCollectionGoods.splice(0, inCardCollectionGoods.length);
 
-    Array.prototype.forEach.call(allGoodsInCardElement, function (goods) {
+    Array.prototype.forEach.call(inCardAllGoods, function (goods) {
       goods.remove();
     });
 
     showOrderedAmountSum();
-    disabledBuyForm(true);
+    disableBuyForm(true);
+    switchEmptyCartState(true);
 
-    goodsCards.classList.add('goods__cards--empty');
-    goodsCards.querySelector('.goods__card-empty').classList.remove('visually-hidden');
     basketCount.textContent = 'В корзине ничего нет';
   };
 
@@ -107,7 +131,7 @@
 
   var addNewGoodInCard = function (good) {
     good.orderedAmount = 1;
-    goodsInCardCollection.push(good);
+    inCardCollectionGoods.push(good);
 
     var goodsInCardElement = createGoodsInCardElement(good);
 
@@ -118,18 +142,17 @@
   var copyGoodToCard = function (item) {
     var goodsCardCopy = Object.assign({}, item);
 
-    disabledBuyForm(false);
+    disableBuyForm(false);
     togglePayment('payment__card');
     toggleDeliver('deliver__store');
 
-    if (goodsInCardCollection.length === 0) {
+    if (!inCardCollectionGoods.length) {
 
-      goodsCards.classList.remove('goods__cards--empty');
-      goodsCards.querySelector('.goods__card-empty').classList.add('visually-hidden');
+      switchEmptyCartState(false);
       addNewGoodInCard(goodsCardCopy);
 
     } else {
-      var goodInCard = goodsInCardCollection.find(function (cardGood) {
+      var goodInCard = inCardCollectionGoods.find(function (cardGood) {
         return cardGood.name === item.name;
       });
 
@@ -142,14 +165,14 @@
   };
 
   goodsCards.addEventListener('click', function (evt) {
-    var nameItemInCard = getDataItem(evt, goodsCards, 'goods_card', '.card-order__title');
+    var nameItemInCard = evt.target.closest('.goods_card').querySelector('.card-order__title').textContent;
 
-    var cardGoodsNames = goodsInCardCollection.map(function (item) {
+    var cardGoodsNames = inCardCollectionGoods.map(function (item) {
       return item.name;
     });
 
     var cardsIndex = cardGoodsNames.indexOf(nameItemInCard);
-    var activeItemInCard = goodsInCardCollection[cardsIndex];
+    var activeItemInCard = inCardCollectionGoods[cardsIndex];
 
     if (evt.target.classList.contains('card-order__close')) {
       evt.preventDefault();

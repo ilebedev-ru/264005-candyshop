@@ -4,7 +4,11 @@
   var ESC_KEYCODE = 27;
   var DEBOUNCE_INTERVAL = 500;
 
-  var lastTimeout;
+  var paymentValidateParam = {
+    CVC_MIN: 100,
+    CARD_LENGTH: 16,
+    DATE_LENGTH: 5
+  };
 
   var starsToClassName = {
     1: 'stars__rating--one',
@@ -14,36 +18,21 @@
     5: 'stars__rating--five'
   };
 
-  var paymentValidateParam = {
-    CVC_MIN: 100,
-    CARD_LENGTH: 16,
-    DATE_LENGTH: 5
-  };
-
-  var getDataItem = function (evt, clickArea, className, title) {
-    var target = evt.target;
-
-    while (target !== clickArea) {
-      if (target.classList.contains(className)) {
-        return target.querySelector(title).textContent;
-      }
-      target = target.parentElement;
-    }
-    return target;
-  };
+  var lastTimeout;
 
   var checkNumberByLun = function (number) {
-    var numArr = number.split('').reverse();
+    var arrNums = number.split('').reverse();
     var results = 0;
 
-    for (var i = 0; i < numArr.length; i++) {
+    arrNums.forEach(function (numItem, i) {
       if (i % 2 !== 0) {
-        var evenNum = +numArr[i] * 2;
+        var evenNum = +numItem * 2;
         results += (evenNum > 9) ? evenNum -= 9 : evenNum;
       } else {
-        results += +numArr[i];
+        results += +numItem;
       }
-    }
+    });
+
     return results % 10 === 0;
   };
 
@@ -64,7 +53,6 @@
     ESC_KEYCODE: ESC_KEYCODE,
     starsToClassName: starsToClassName,
     paymentValidateParam: paymentValidateParam,
-    getDataItem: getDataItem,
     checkNumberByLun: checkNumberByLun,
     getUnique: getUnique,
     debounce: debounce

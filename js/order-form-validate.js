@@ -2,6 +2,7 @@
 
 (function () {
   var ESC_KEYCODE = window.utils.ESC_KEYCODE;
+
   var paymentValidateParam = window.utils.paymentValidateParam;
   var checkNumberByLun = window.utils.checkNumberByLun;
 

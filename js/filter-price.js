@@ -47,7 +47,7 @@
     evt.preventDefault();
     var startCoordsX = evt.clientX;
 
-    var maxPrice = findMaxPrice(window.goodsData);
+    var maxPrice = findMaxPrice(window.goods.data);
 
     var pinOptions = {};
     if (evt.target.offsetLeft === rangeBtnLeft.offsetLeft) {
@@ -115,10 +115,10 @@
     evt.preventDefault();
     moveFlag = false;
 
-    var maxPrice = findMaxPrice(window.goodsData);
+    var maxPrice = findMaxPrice(window.goods.data);
 
     var filterUpHandler = function () {
-      if (moveFlag === false) {
+      if (!moveFlag) {
         var newX = evt.clientX - coordFieldMin - PIN_WIDTH / 2;
         newX = (newX < 0) ? 0 : newX;
 
